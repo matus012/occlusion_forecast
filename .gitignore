@@ -82,4 +82,9 @@ results/mask_manifests/local/
 
 # local state reports (AV2-derived pixels assumed non-committable; guard classifies later)
 reports/
+# PERUN request: template + generated markdown are text-only (no AV2-derived
+# pixels) and ARE tracked; rendered PDF + figures stay local
+!reports/perun_request/
+reports/perun_request/*
+!reports/perun_request/*.md
 results/local/

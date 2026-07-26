@@ -75,3 +75,6 @@ universal-pathlib==0.3.10
 virtualenv==21.7.0
 yarl==1.24.5
 shapely==2.1.2
+imageio==2.37.4
+imageio-ffmpeg==0.6.0
+markdown==3.10.2
