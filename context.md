@@ -243,3 +243,15 @@ otherwise; log as D-N1-3). [Resolved same day: Apache-2.0, see D-N1-3 below.]
       stability across severities on full val, seeds collision-free, mix z<1, placement
       distributionally exact (KS p=1.000). Committed manifests are summary-only
       (av2_manifests precedent), per-scenario labels local with sha256 pinned.
+- D-N1-12 (2026-07-27): G-N1-2 statistical test PRE-REGISTERED before any masked training
+  exists (protocol requirement met with margin — no arm has trained a single step).
+  Test: one-sided Wilcoxon signed-rank on per-scenario paired minFDE6 deltas (C1 - C3,
+  H1: C3 < C1), per-scenario values = mean over >=3 training seeds per arm, regime R-A,
+  mixed-pattern condition, identical deterministic N1-mask-v2 masks for all arms.
+  Severities tested: S2, S3, S4; alpha 0.05, Holm-Bonferroni across the three.
+  Gate key paired_p_s2 = Holm-adjusted p at S2; direction criterion = C3 seed-mean beats
+  C1 at all of S2/S3/S4. Effect size: seeded bootstrap (10k resamples) 95% CI of mean
+  delta, reported alongside. Per-pattern cohort tests (D-N1-10) use the same procedure
+  but are report-only, never gate-blocking (degenerate-entropy caveats per D-N1-11d).
+  Implementation lands as scripts/paired_test.py (P1 pattern) in Phase 4; the spec text
+  in gates.yaml is immutable from this commit.

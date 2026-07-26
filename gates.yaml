@@ -70,11 +70,21 @@ gates:
     criteria:
       n_seeds_per_arm: {min: 3, key: headline.n_seeds_per_arm}
       paired_p_s2: {max: 0.05, key: headline.paired_p_s2, freeze_order: last,
-                    note: "PLACEHOLDER — exact test (Wilcoxon vs bootstrap CI), alpha,
-                           and correction pre-registered Phase 3 (D-N1-x) before any
-                           masked training finishes"}
+                    note: "PRE-REGISTERED 2026-07-27 (D-N1-12), BEFORE any masked training
+                           exists: one-sided Wilcoxon signed-rank on per-scenario paired
+                           minFDE6 deltas (C1 - C3; H1: C3 < C1), seed-mean per scenario
+                           (>=3 seeds/arm) before pairing, regime R-A, MIXED pattern
+                           condition, identical N1-mask-v2 masks. Tested at S2, S3, S4;
+                           alpha 0.05 with Holm-Bonferroni across the 3 severities.
+                           paired_p_s2 = Holm-adjusted p at S2. Effect size reported as
+                           seeded 10k-resample bootstrap 95% CI of the mean delta.
+                           Per-pattern cohort tests (D-N1-10): same procedure, REPORT-ONLY,
+                           never gate-blocking. Numeric freeze (frozen: true) still awaits
+                           results per protocol; the TEST SPEC is immutable from this
+                           commit."}
       c3_beats_c1_s2: {equals: true, key: headline.c3_beats_c1_s2, freeze_order: last,
-                       note: PLACEHOLDER — direction check at S2+; frozen with the test}
+                       note: "PRE-REGISTERED with D-N1-12 — direction check: seed-mean
+                              minFDE6(C3) < minFDE6(C1) at S2, S3, and S4 (all three)"}
 
   G_N1_3_no_clean_tax:
     description: >

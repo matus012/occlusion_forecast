@@ -14,5 +14,21 @@
     "per_file_manifest_sha256": "2a7c62b8f3f95d279d497bf420ca7cc3f2030c639d733a1223dc6a9843f98ad4",
     "wall_seconds": 804.8,
     "date": "2026-07-26"
+  },
+  "train": {
+    "split": "train",
+    "source": "s3://argoverse/datasets/av2/motion-forecasting (public bucket, aws cli --no-sign-request)",
+    "n_scenario_dirs": 199908,
+    "official_count": 199908,
+    "count_matches_official": true,
+    "structural_errors": [],
+    "structure_ok": true,
+    "n_files_hashed": 399816,
+    "total_bytes": 50464592446,
+    "aggregate_sha256": "ca4b9b327a3a9c1cef4fe6b8f26b6f50df9aa7c49fc384f59ba68137ca6eb07c",
+    "per_file_manifest": "results/av2_manifests/train_manifest.json.gz (local-only, large)",
+    "per_file_manifest_sha256": "787386b7f7ef47474d69f9de3ca3a21d808757cf731492bce54508e9619d6369",
+    "wall_seconds": 3132.1,
+    "date": "2026-07-27"
   }
 }

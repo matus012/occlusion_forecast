@@ -1,7 +1,9 @@
-N1 STATUS — 2026-07-26 (kickoff session 1; Phase 0 scaffold)
+N1 STATUS — 2026-07-27 (kickoff session 1, continuing)
 
-STATE: Phase 0 COMPLETE (pending push verify). Phase 1 (eval-kit sanity, G-N1-0) starting.
-Ship target Sept 12.
+STATE: Phases 0-1 COMPLETE (G-N1-0 PASSED+FROZEN). Phase 3 mask engine COMPLETE
+(generator + manifests committed, twice-reviewed; G-N1-2 test PRE-REGISTERED D-N1-12).
+Phase 2 (baseline train) blocked only on D-N1-7 baseline decision (user) + PERUN.
+AV2 val+train fully synced; train SHA verification running. Ship target Sept 12.
 
 DONE THIS SESSION:
 - git init; default-deny .gitignore (data/, cache/, checkpoints/, *.parquet, all visuals);
