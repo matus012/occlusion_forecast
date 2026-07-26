@@ -1,0 +1,9 @@
+{
+  "source": "https://github.com/ZikangZhou/QCNet README (checked 2026-07-26) — 'Quantitative Results' AV2 val split, released checkpoint QCNet_AV2",
+  "checkpoint": "https://drive.google.com/file/d/1OKBytt6N6BdRa9FWmS7F1-YvF0YectBv/view (Google Drive, live as of 2026-07-26)",
+  "license": "Apache-2.0",
+  "role": "G-N1-0 eval-kit sanity anchor (D-N1-6) — NOT the training baseline (that is Forecast-MAE, D-N1-1)",
+  "minade6": 0.72,
+  "minfde6": 1.25,
+  "mr6": 0.16
+}

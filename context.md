@@ -137,3 +137,21 @@ otherwise; log as D-N1-3). [Resolved same day: Apache-2.0, see D-N1-3 below.]
   data/parquet/visuals with the D41 per-file visual allowlist in tests/test_license_guard.py;
   env pinned day 1 (py3.11, torch 2.13.0+cu126, av2 0.x, lightning — requirements.txt);
   CI = torch-free guard subset (ruff + license guard + gates-config tests) on ubuntu.
+- D-N1-5 (2026-07-26): CORRECTION to D-N1-3 premise — forecast-mae has NO declared license
+  (no LICENSE file; GitHub license metadata null; checked at pin commit cb86ea9). Our
+  Apache-2.0 stands for OUR code, but FMAE is not redistributable: third_party/ stays
+  untracked (guard-enforced), pinned via results/fmae_vendor_manifest.json, integration is
+  wrap-and-import only — no FMAE file is ever copied into src/ or committed. Published-val
+  anchor numbers for G-N1-0 read from the pinned README (fine-tune: minADE6 0.7117,
+  minFDE6 1.408, MR6 0.178; scratch: 0.7214/1.430/0.187) → results/fmae_published_val.json.
+- D-N1-6 (2026-07-26): ALL THREE FMAE checkpoint links are dead (HKUST OneDrive 404 —
+  verified curl + real browser; no mirrors on HF/forks/web). Adaptation, NOT full fallback:
+  G-N1-0 eval-kit sanity re-anchored to the QCNet released checkpoint (live Google Drive
+  link, repo Apache-2.0, published AV2 val: minADE6 0.72 / minFDE6 1.25 / MR6 0.16) —
+  the gate's purpose is validating OUR av2-kit usage against SOMEONE'S released model,
+  not FMAE specifically. FMAE remains the training baseline (D-N1-1 stands); G-N1-1
+  anchors to FMAE published SCRATCH numbers. QCNet eval runs in its own venv
+  (.venv-qcnet) to keep the pinned FMAE env clean. Residual risk: FMAE published numbers
+  now unverified by checkpoint — mitigation: G-N1-1 tolerance frozen only after our own
+  retrain lands within family range. OPEN (needs user, outward-facing): file a GitHub
+  issue on jchengai/forecast-mae asking for checkpoint re-upload.

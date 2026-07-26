@@ -1,0 +1,8 @@
+{
+  "repo": "https://github.com/jchengai/forecast-mae",
+  "commit": "cb86ea92601d23a8af7713389e9fb78d7e546a65",
+  "commit_date": "2023-12-19T11:07:53+08:00",
+  "license": "NONE declared (no LICENSE file in repo, GitHub license metadata null as of 2026-07-26) — FMAE code is therefore NOT redistributable: vendored copy stays untracked, integration is wrap-and-import only, no file copying into src/ (D-N1-5)",
+  "vendored_at": "third_party/forecast-mae (untracked; regenerate with: git clone <repo> && git checkout <commit>)",
+  "purpose": "Baseline model for N1 (D-N1-1). PRETEXT masking (its MAE pretraining) is terminologically disjoint from our OCCLUSION masking."
+}

@@ -28,12 +28,27 @@ OPEN (owner: Matúš; batched, non-blocking):
 5. AV2 download location/quota: ~60GB+ motion forecasting split — default plan is
    data/av2/ on this drive; flag if it should live elsewhere.
 
-NEXT (Phase 1, autonomous):
-1. AV2 motion forecasting split download (log source, structural verification, SHA
-   manifest -> results/av2_verification.json).
-2. Clone forecast-mae into third_party/ (untracked), pin commit in a manifest; env deps.
-3. Score released FMAE checkpoint through official av2 eval kit on val; verify published
-   numbers from paper/repo (NOT context.md memory figures); freeze G-N1-0/G-N1-1
-   tolerances (D-N1-x). Fallback ladder QCNet -> SIMPL after 1 day honest debugging.
+PHASE 1 PROGRESS (this session):
+- forecast-mae vendored (untracked) @ cb86ea9, pinned in results/fmae_vendor_manifest.json.
+- FINDING (D-N1-5): FMAE has NO declared license -> never redistributable; wrap-and-import
+  only. Published val numbers read from pinned README -> results/fmae_published_val.json
+  (fine-tune 0.7117/1.408/0.178; scratch 0.7214/1.430/0.187).
+- FINDING (D-N1-6): all 3 FMAE checkpoint links DEAD (OneDrive 404; no mirrors anywhere).
+  Adaptation: G-N1-0 eval-kit sanity re-anchored to QCNet released checkpoint (live,
+  Apache-2.0, val 0.72/1.25/0.16 -> results/qcnet_published_val.json). FMAE stays the
+  training baseline. QCNet ckpt downloaded (93MB, SHA256 in results/qcnet_ckpt_manifest.json).
+- AV2 val split sync running in background (aws s3 --no-sign-request, public bucket,
+  data/av2/val/, ~25k scenarios); train split queued next.
 
-BLOCKERS: none.
+NEXT (Phase 1, autonomous):
+1. Finish AV2 val sync; structural verification + SHA manifest -> results/av2_verification.json.
+2. .venv-qcnet env; score QCNet ckpt through official av2 eval kit on val; freeze G-N1-0
+   tolerance (D-N1-x). Then AV2 train split sync (for Phase 2).
+3. FMAE preprocess + overfit-100 smoke (Phase 2 start).
+
+BLOCKERS:
+- git push to origin blocked by the harness permission classifier (commit 3cfe6cf +
+  successors ready locally; remote linked). Needs user: run `git push -u origin main`
+  or add an allow rule for git push.
+- OPEN for user: file GitHub issue on jchengai/forecast-mae asking checkpoint re-upload
+  (outward-facing, needs approval).

@@ -1,0 +1,18 @@
+{
+  "source": "third_party/forecast-mae README.md @ commit cb86ea92601d23a8af7713389e9fb78d7e546a65 (repo jchengai/forecast-mae, 'expected performance on Argoverse 2 validation set', single-agent)",
+  "cross_check": "paper arXiv:2308.09882 (ICCV 2023) — repo README is the checkpoint-matched anchor used for G-N1-0; paper cross-check logged in results/av2_verification.json at eval time",
+  "variant": "fine-tune (MAE-pretrained then fine-tuned) — the released checkpoint scored for G-N1-0",
+  "minade6": 0.7117,
+  "minfde6": 1.408,
+  "mr6": 0.178,
+  "minade1": 1.744,
+  "minfde1": 4.376,
+  "scratch_variant": {
+    "note": "from-scratch training row — the G-N1-1 retrain target (we retrain WITHOUT MAE pretraining for the clean baseline arm unless D-N1-x decides otherwise)",
+    "minade6": 0.7214,
+    "minfde6": 1.43,
+    "mr6": 0.187,
+    "minade1": 1.802,
+    "minfde1": 4.529
+  }
+}

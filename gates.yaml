@@ -17,14 +17,14 @@ version: 1
 gates:
   G_N1_0_evalkit:
     description: >
-      Eval-kit sanity: released Forecast-MAE checkpoint scored through the OFFICIAL
-      av2-api eval kit on val reproduces the paper's published val numbers within
-      tolerance. Published numbers verified from paper/repo in Phase 1 (context.md
-      from-memory figures are NOT authoritative). Blocks everything downstream.
+      Eval-kit sanity: a RELEASED checkpoint scored through the OFFICIAL av2-api eval
+      kit on val reproduces its published val numbers within tolerance. Anchor model =
+      QCNet released checkpoint (D-N1-6: all FMAE checkpoint links dead; the gate
+      validates OUR kit usage, not FMAE specifically). Blocks everything downstream.
     frozen: false
     results:
       ours: results/g_n1_0_checkpoint_eval.json
-      published: results/fmae_published_val.json
+      published: results/qcnet_published_val.json
     criteria:
       abs_delta_minade: {max: 0.02, between: [ours.minade6, published.minade6],
                          note: PROVISIONAL — freeze from measurement (D-N1-x)}

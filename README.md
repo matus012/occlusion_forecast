@@ -32,4 +32,8 @@ baseline evaluation is next. See `gates.yaml` for the quality-gate ladder
 
 ## License
 
-Apache-2.0 (matches the Forecast-MAE baseline this work builds on).
+This repository's own code is Apache-2.0. The Forecast-MAE baseline it builds
+on ([jchengai/forecast-mae](https://github.com/jchengai/forecast-mae)) declares
+**no license**; it is therefore never redistributed here — the pinned commit is
+cloned locally at setup time (see `results/fmae_vendor_manifest.json`) and used
+via imports only.
