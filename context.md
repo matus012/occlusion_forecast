@@ -212,3 +212,34 @@ otherwise; log as D-N1-3). [Resolved same day: Apache-2.0, see D-N1-3 below.]
   if mixed-curve degradation is weak but M1/M2-only curves are strong, the headline
   becomes "degradation depends on occlusion structure, not just masked fraction" —
   a finding, not a fallback.
+- D-N1-11 (2026-07-26): mask-generator design facts from the adversarial review (opus),
+  binding on all reporting:
+  (a) R-B x M2 EXCLUDED — "appeared late AND still occluded at t=0" = never observed =
+      no scenario; R-B mix renormalizes to M1 0.421 / M3 0.579 (computed, not hardcoded).
+  (b) M1 block duration is DETERMINED by the severity target (fraction guarantee wins);
+      the P2 lognormal is inert for M1. P2 statistics enter ONLY via (i) the pattern mix
+      and (ii) M3's relative block-size ratios. Docs/README must never claim per-block
+      durations follow the P2 fit.
+  (c) R4 sensitivity sweep REDEFINED: global ±50% duration scaling cancels against the
+      fraction guarantee (measured: M1 100% invariant, M3 mean block length invariant to
+      4 s.f. — though ~80% of individual M3 masks still change, and the fit SHAPE
+      parameter remains an executable axis; scaling cannot move aggregate duration
+      statistics). The executable sensitivity axes are: mix perturbation (empirical
+      D-N1-9 mix vs v1 prior 0.6/0.25/0.15 as the alternative condition) and M3
+      block-count range. R4 sweep = re-eval one arm under the v1-prior mix, report-only.
+  (d) Reporting requirements: R-A severity label is not proportional to forecast-relevant
+      information loss (recent-window masking probability is ~2.5-4x lower than nominal —
+      recency discount; curve captions must say so); R-A and R-B severity labels are NOT
+      difficulty-comparable (S1 R-B can remove more recent information than S4 R-A);
+      degenerate-entropy arms exist by construction (M2/R-A and M1/R-B collapse to 1
+      distinct mask per severity — the M1/R-B arm measures a single realization shared
+      by ~42% of the R-B bucket, 10561/24988) — state this wherever those slices are
+      plotted. [34%→42% corrected 2026-07-27 per reviewer's own re-measurement.]
+  (e) Review outcome: first implementation REJECTED (severity-coupled pattern redraw
+      destroyed per-pattern pairing; license-guard ceiling; missing property tests;
+      edge-gap placement bias up to 17% from sorted sampling-with-replacement — fixed
+      by a proper stars-and-bars sampler). Fixes + SPEC_VERSION bump ("N1-mask-v2") +
+      manifest regeneration verified in re-review (APPROVE): 100% pattern-cohort
+      stability across severities on full val, seeds collision-free, mix z<1, placement
+      distributionally exact (KS p=1.000). Committed manifests are summary-only
+      (av2_manifests precedent), per-scenario labels local with sha256 pinned.

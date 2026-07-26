@@ -75,5 +75,10 @@ n1_handoff_prompt.md
 # per-file dataset SHA manifests (large; aggregate + manifest-hash live in results/av2_verification.json)
 results/av2_manifests/
 
+# Phase 3 per-scenario occlusion-mask pattern labels (large, regenerable via
+# otraj.masking.manifest.build_labels(); committable summaries with spec_hash
+# + a sha256 pointer to these live in results/mask_manifests/ itself)
+results/mask_manifests/local/
+
 # local state reports (AV2-derived pixels assumed non-committable; guard classifies later)
 reports/
