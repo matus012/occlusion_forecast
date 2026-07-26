@@ -46,9 +46,11 @@ NEXT (Phase 1, autonomous):
    tolerance (D-N1-x). Then AV2 train split sync (for Phase 2).
 3. FMAE preprocess + overfit-100 smoke (Phase 2 start).
 
-BLOCKERS:
-- git push to origin blocked by the harness permission classifier (commit 3cfe6cf +
-  successors ready locally; remote linked). Needs user: run `git push -u origin main`
-  or add an allow rule for git push.
-- OPEN for user: file GitHub issue on jchengai/forecast-mae asking checkpoint re-upload
-  (outward-facing, needs approval).
+TRIPWIRE (D-N1-7, user directive 2026-07-26): FMAE-as-training-baseline is PROVISIONAL.
+End of wk1: (a) license grant on the FMAE issue -> keep FMAE; (b) else cost out
+QCNet-switch vs own-code FMAE-finetune reimplementation (honest H200h + dev-time box),
+report comparison here with recommendation; USER DECIDES. Masking engine stays
+baseline-agnostic either way.
+- FMAE issue FILED: github.com/jchengai/forecast-mae/issues/25 (checkpoints + license).
+
+BLOCKERS: none. (Push resolved — user pushed; origin/main tracking set.)

@@ -155,3 +155,14 @@ otherwise; log as D-N1-3). [Resolved same day: Apache-2.0, see D-N1-3 below.]
   now unverified by checkpoint — mitigation: G-N1-1 tolerance frozen only after our own
   retrain lands within family range. OPEN (needs user, outward-facing): file a GitHub
   issue on jchengai/forecast-mae asking for checkpoint re-upload.
+- D-N1-7 (2026-07-26, user directive): BASELINE LICENSE TRIPWIRE — D-N1-1 (FMAE as
+  training baseline) is PROVISIONAL pending license clarification. Deadline end of wk1:
+  (a) FMAE issue yields a license grant → keep FMAE, log it; (b) otherwise cost out and
+  report in status.txt with a recommendation (user decides):
+    (1) switch training baseline to QCNet — Apache-2.0, checkpoint-anchored G-N1-1, but
+        honest H200h estimate for retraining 3 arms × 3 seeds against the PERUN budget;
+    (2) own-code reimplementation of the FMAE finetune-only variant from the paper — no
+        license dependency; viable ONLY if it fits inside the wk2 tripwire box.
+  Until resolved: no FMAE-derived code beyond wrap-and-import experiments; masking engine
+  (Phase 3) stays baseline-agnostic by design (operates on validity masks, not model
+  internals) so it survives either outcome.
