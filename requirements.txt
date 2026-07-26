@@ -74,3 +74,4 @@ tzdata==2026.3
 universal-pathlib==0.3.10
 virtualenv==21.7.0
 yarl==1.24.5
+shapely==2.1.2

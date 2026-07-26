@@ -1,0 +1,33 @@
+{
+  "spec": "N1-local-v1",
+  "mask_spec": "N1-mask-v2",
+  "created": "2026-07-27",
+  "ordering": "ascending ((rank+1)/stratum_size, sha256-hash) within-stratum interleave; any prefix is stratum-proportional",
+  "hash_string": "sha256('{spec}|{split}|{scenario_id}')[:8] big-endian",
+  "train": {
+    "n_total": 199908,
+    "stratum": "city (parquet row-group statistics)",
+    "city_counts": {
+      "austin": 42279,
+      "dearborn": 24020,
+      "miami": 53932,
+      "palo-alto": 11777,
+      "pittsburgh": 42652,
+      "washington-dc": 25248
+    },
+    "file": "results/local/train_pool.json",
+    "sha256": "4d6757e666c54cb4fd688372cdd8760b8608a5e0c5431c1f535d547fe5863b76"
+  },
+  "val": {
+    "n_total": 24988,
+    "stratum": "N1-mask-v2 R-A pattern cohort (severity-independent draw)",
+    "cohort_counts": {
+      "M1": 10045,
+      "M2": 1259,
+      "M3": 13684
+    },
+    "file": "results/local/val_order.json",
+    "sha256": "fd176247136709702802394192e79b3b579571cf4026468f8142f7e1f86ba352"
+  },
+  "note": "Trained-on subset and fixed eval subset are PREFIXES of these orderings; prefix lengths are frozen by measurement (D-N1-14) and recorded in results/local/budget.json."
+}

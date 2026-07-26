@@ -82,3 +82,4 @@ results/mask_manifests/local/
 
 # local state reports (AV2-derived pixels assumed non-committable; guard classifies later)
 reports/
+results/local/

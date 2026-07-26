@@ -255,3 +255,28 @@ otherwise; log as D-N1-3). [Resolved same day: Apache-2.0, see D-N1-3 below.]
   but are report-only, never gate-blocking (degenerate-entropy caveats per D-N1-11d).
   Implementation lands as scripts/paired_test.py (P1 pattern) in Phase 4; the spec text
   in gates.yaml is immutable from this commit.
+- D-N1-13 (2026-07-27, owner decision): D-N1-7 RESOLVED — training baseline = SIMPL
+  (MIT, checkpoint shipped in-repo; verification facts in D-N1-7a). FMAE demoted:
+  revisit ONLY if upstream grants a license AND republishes checkpoints (issue #25
+  stays open as a tracker, not a blocker). G-N1-1 re-anchors to the SIMPL author-posted
+  ckpt-matched AV2 val numbers (minADE6 0.777 / minFDE6 1.452 / MR6 0.196, D-N1-7a);
+  tolerance freeze when the first SIMPL retrain lands. D-N1-1's FMAE choice superseded;
+  masking engine unaffected (baseline-agnostic by design, D-N1-7). Occlusion application
+  for SIMPL follows the native convention: validity flag→0 + nn-pad pos/ang + zero vel
+  (flag-flip is the cross-baseline invariant).
+- D-N1-14 (2026-07-27, user directive): HPC COMMITTEE PACKAGE — reduced-scale local
+  proof on the 4060 feeding the PERUN request (reports/perun_request/):
+  (a) SIMPL arms C1-local (clean) + C3-local (occlusion-aug per spec, p_occ=0.5,
+      empirical D-N1-9 mix, fresh draw per epoch), 1 seed each, stratified train subset
+      sized by measurement to an overnight-or-less budget; ALL outputs labeled *-local
+      and never mixed with the real gate arms (G-N1-1..3 untouched).
+  (b) Mini degradation curve: C1/C2/C3-local × S0–S4 × R-A on a fixed val subset,
+      deterministic N1-mask-v2 masks, official av2 kit as metric authority; figure
+      watermarked "reduced-scale local proof — full matrix pending HPC".
+  (c) Side-by-side inference video (C1-local vs C3-local, identical masks, labeled
+      "illustrative scenarios"); mp4/gif local-only, script committed.
+  (d) PERUN request report: scope + methodology/gates + evidence (G-N1-0 freeze,
+      mask-engine review record, mini curve, video stills) + compute justification
+      from MEASURED local throughput extrapolated to 3 arms × 3 seeds × full data on
+      H200s, with measured 8GB-VRAM infeasibility evidence. Factual tone; user edits
+      and submits. [Measurement freezes appended below as sub-entries.]
