@@ -1,0 +1,86 @@
+{
+  "n_scenarios": 24,
+  "n_agents_total": 161,
+  "excluded_artifact_agents": [
+    {
+      "scenario_id": "behind_static_0000",
+      "agent_id": 6
+    },
+    {
+      "scenario_id": "behind_static_0015",
+      "agent_id": 6
+    },
+    {
+      "scenario_id": "behind_static_0018",
+      "agent_id": 4
+    },
+    {
+      "scenario_id": "behind_static_0021",
+      "agent_id": 4
+    }
+  ],
+  "n_agents_analyzed": 157,
+  "fps": 20,
+  "scenario_duration_s": 20.0,
+  "n_segments": 205,
+  "duration_fit_lognormal": {
+    "shape": 1.167880578593321,
+    "loc": 0.0,
+    "scale": 1.0927859089505043,
+    "median_s": 1.0927859089505043,
+    "mean_s": 2.161284753651929,
+    "n": 205
+  },
+  "segments_per_agent_mean": 1.305732484076433,
+  "segments_per_agent_second": 0.06818786588610964,
+  "spacing_s": {
+    "median": 2.35,
+    "mean": 3.216836734693877,
+    "n_samples": 98
+  },
+  "pattern_mix": {
+    "counts": {
+      "none": 50,
+      "M3": 55,
+      "M1": 40,
+      "other_trailing": 4,
+      "M2": 6,
+      "other_many": 2
+    },
+    "fractions_of_all_analyzed_agents": {
+      "none": 0.3184713375796178,
+      "M3": 0.3503184713375796,
+      "M1": 0.25477707006369427,
+      "other_trailing": 0.025477707006369428,
+      "M2": 0.03821656050955414,
+      "other_many": 0.012738853503184714
+    },
+    "fractions_of_M1_M2_M3_only": {
+      "M1": 0.39603960396039606,
+      "M2": 0.0594059405940594,
+      "M3": 0.5445544554455446
+    },
+    "n_agents_with_runs": 107,
+    "m3_strict_duration_band_fraction": 0.09090909090909091,
+    "v1_prior": {
+      "M1": 0.6,
+      "M2": 0.25,
+      "M3": 0.15
+    },
+    "note": "fractions_of_M1_M2_M3_only is the apples-to-apples comparison against the v1 prior (which only defines M1/M2/M3, summing to 1.0); fractions_of_all_analyzed_agents also includes agents with zero qualifying segments ('none') and two taxonomy leftovers outside M1/M2/M3 ('other_trailing': occlusion never recovers before the trace ends; 'other_many': >4 segments)."
+  },
+  "p1_d14_exact_comparison": {
+    "both_anchored_segment_count": 185,
+    "both_anchored_gap_median_frames": 13.0,
+    "cited_p2_reference_n_segments": 223,
+    "cited_p2_reference_n_scenarios": 24,
+    "note": "both-anchored count uses the identical P1 D14 thresholds/logic (vis_hi=0.5, vis_lo=0.25, min_len=5) as a direct sanity check against the ~223-segment figure cited in context.md D-N1-2 / P1 D23; it excludes the unanchored leading/trailing runs this module adds to detect M2/trailing patterns."
+  },
+  "mot17_sanity_anchor": {
+    "median_gap_frames": 37,
+    "median_gap_s": 1.5,
+    "source": "context.md D-N1-2, citing P1 D14 (MOT17-02 single-sequence figure); NOT used to fit the P2 duration distribution, sanity anchor only"
+  },
+  "source": "ws/100_occlusion_mot/data/sim/scenarios (P1/P2 sibling repo, local; CARLA GT)",
+  "extracted_date": "2026-07-26"
+}

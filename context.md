@@ -190,3 +190,16 @@ otherwise; log as D-N1-3). [Resolved same day: Apache-2.0, see D-N1-3 below.]
   notes: PyG 2.8 needed a module-level TargetBuilder forward-shim (no third_party edits);
   QCNet preprocessing requires an ABSOLUTE dataset root (upstream path-join bug with
   relative roots).
+- D-N1-9 (2026-07-26): P2 stats extracted (results/p2_occlusion_stats.json; 24 CARLA
+  scenarios, 157/161 agents analyzed — 4 walker-6 render artifacts excluded by the
+  data-driven criterion "never reaches vis_hi=0.5" (3 all-zero traces + 1 with a
+  sub-threshold noise bump peaking 0.21), per P1 D23 — 205 segments @ fps=20). Duration fit: lognormal(shape 1.168, loc 0, scale 1.093) →
+  median 1.09s, mean 2.16s; MOT17 anchor (~1.5s median) same order — sane. MIX RE-DERIVED,
+  P2 WINS per D-N1-2 pre-commitment: empirical M1 0.396 / M2 0.059 / M3 0.545 (of
+  M1M2M3-classified agents) vs v1 prior 0.6/0.25/0.15 — real occlusion is FLICKER-DOMINATED.
+  The Phase 3 mask generator (not yet implemented) WILL use mix M1 0.40 / M2 0.05 /
+  M3 0.55. SPEC AMENDMENT: the v1 M3 band
+  (0.2-0.6s per block) fits only 9% of real flicker runs — M3 block durations now sample
+  the fitted lognormal clipped to 0.2-2.0s (2-4 blocks unchanged); M1 clip 0.3-4.0s
+  unchanged. Six agents outside the taxonomy (4 trailing-never-recovers, 2 with >4
+  segments) reported in the JSON, not force-classified.
