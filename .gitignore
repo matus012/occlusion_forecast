@@ -74,3 +74,6 @@ n1_handoff_prompt.md
 
 # per-file dataset SHA manifests (large; aggregate + manifest-hash live in results/av2_verification.json)
 results/av2_manifests/
+
+# local state reports (AV2-derived pixels assumed non-committable; guard classifies later)
+reports/

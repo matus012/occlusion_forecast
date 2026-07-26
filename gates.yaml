@@ -60,6 +60,9 @@ gates:
       per-scenario paired minFDE. Test + alpha PRE-REGISTERED in Phase 3 before any
       masked training completes (placeholder below until then; check_gates skips
       freeze_order: last criteria while unfrozen).
+      D-N1-10 addendum: P2 empirical mix is the primary eval condition; per-pattern
+      curves (M1/M2/M3-only at matched masked fractions) accompany the mixed curve,
+      and eval mask manifests carry per-scenario pattern labels for slicing.
     frozen: false
     depends_on: G_N1_1_repro
     results:

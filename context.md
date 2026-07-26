@@ -203,3 +203,12 @@ otherwise; log as D-N1-3). [Resolved same day: Apache-2.0, see D-N1-3 below.]
   the fitted lognormal clipped to 0.2-2.0s (2-4 blocks unchanged); M1 clip 0.3-4.0s
   unchanged. Six agents outside the taxonomy (4 trailing-never-recovers, 2 with >4
   segments) reported in the JSON, not force-classified.
+- D-N1-10 (2026-07-26, user directive): Phase 3 EVAL-PROTOCOL ADDENDUM. (a) P2-derived
+  empirical mix stays the PRIMARY eval condition, but per-pattern degradation curves
+  (M1-only / M2-only / M3-only at matched masked fractions) are emitted alongside the
+  mixed curve — pattern difficulty differs and aggregate-only reporting could mask it.
+  (b) The deterministic eval mask manifest stores per-scenario pattern labels so
+  per-pattern slicing needs no mask regeneration. (c) Pre-registered honest reframing:
+  if mixed-curve degradation is weak but M1/M2-only curves are strong, the headline
+  becomes "degradation depends on occlusion structure, not just masked fraction" —
+  a finding, not a fallback.
