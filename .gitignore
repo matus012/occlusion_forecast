@@ -71,3 +71,6 @@ gate_report.txt
 
 # local meta (session handoff prompt stays untracked)
 n1_handoff_prompt.md
+
+# per-file dataset SHA manifests (large; aggregate + manifest-hash live in results/av2_verification.json)
+results/av2_manifests/
