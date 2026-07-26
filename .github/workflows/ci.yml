@@ -1,0 +1,20 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  guards:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      # CI runs the torch-free guard/config subset: license guard, gate-config
+      # sanity, lint. The full ML stack (torch cu126, av2) is local/PERUN-only.
+      - run: pip install pytest ruff pyyaml
+      - run: ruff check .
+      - run: pytest tests/test_license_guard.py tests/test_gates_config.py -q

@@ -1,0 +1,105 @@
+# N1 quality gates — scripts/check_gates.py is the executable interpretation.
+# Ported from P1 (ws/100_occlusion_mot) gate discipline.
+#
+# Semantics:
+# - A criterion is {min: x} or {max: x} against a key in the gate's results JSON,
+#   or {rel_min/rel_max: {source: <file>:<key>, offset: <f>}} resolved at check time,
+#   or {max: x, between: [a.key, b.key]} for absolute deltas.
+# - frozen: false + missing results  -> gate reports PENDING (loop continues, NEVER hard-fails).
+# - frozen: false + results present -> evaluated advisorily; freezing = setting frozen: true
+#   and replacing provisional numbers with measured ones (commit message "G-N1-x: freeze").
+# - ALL numeric tolerances below are PROVISIONAL (UNFROZEN) until G-N1-0 measurement:
+#   G-N1-0/1 tolerances freeze after the released-checkpoint eval (Phase 1);
+#   G-N1-2 statistical test pre-registers in Phase 3 BEFORE any masked training finishes.
+# - Hard failure: only via a HARD_FAIL marker file in repo root (check_gates exits 2).
+version: 1
+
+gates:
+  G_N1_0_evalkit:
+    description: >
+      Eval-kit sanity: released Forecast-MAE checkpoint scored through the OFFICIAL
+      av2-api eval kit on val reproduces the paper's published val numbers within
+      tolerance. Published numbers verified from paper/repo in Phase 1 (context.md
+      from-memory figures are NOT authoritative). Blocks everything downstream.
+    frozen: false
+    results:
+      ours: results/g_n1_0_checkpoint_eval.json
+      published: results/fmae_published_val.json
+    criteria:
+      abs_delta_minade: {max: 0.02, between: [ours.minade6, published.minade6],
+                         note: PROVISIONAL — freeze from measurement (D-N1-x)}
+      abs_delta_minfde: {max: 0.05, between: [ours.minfde6, published.minfde6],
+                         note: PROVISIONAL}
+      abs_delta_mr: {max: 0.01, between: [ours.mr6, published.mr6],
+                     note: PROVISIONAL}
+
+  G_N1_1_repro:
+    description: >
+      Baseline repro: our retrained Forecast-MAE (clean data) within tolerance of
+      published val metrics. Tolerance frozen after G-N1-0 (provisional +0.05 minADE).
+      Multi-seed: 1 seed to pass provisionally, 3 seeds before any claimed delta.
+    frozen: false
+    depends_on: G_N1_0_evalkit
+    results:
+      ours: results/g_n1_1_retrain_eval.json
+    criteria:
+      minade6: {rel_max: {source: "results/fmae_published_val.json:minade6", offset: 0.05},
+                key: ours.minade6, note: PROVISIONAL offset — freeze after G-N1-0}
+      minfde6: {rel_max: {source: "results/fmae_published_val.json:minfde6", offset: 0.10},
+                key: ours.minfde6, note: PROVISIONAL}
+
+  G_N1_2_headline:
+    description: >
+      Headline degradation curve: 3 arms (C1 clean-trained / C2 clean+imputation /
+      C3 occlusion-aware) x severities S0-S4 x >=3 seeds, regime R-A, identical
+      deterministic masks. C3 vs C1 improvement at S2+ statistically significant on
+      per-scenario paired minFDE. Test + alpha PRE-REGISTERED in Phase 3 before any
+      masked training completes (placeholder below until then; check_gates skips
+      freeze_order: last criteria while unfrozen).
+    frozen: false
+    depends_on: G_N1_1_repro
+    results:
+      headline: results/g_n1_2_headline.json
+    criteria:
+      n_seeds_per_arm: {min: 3, key: headline.n_seeds_per_arm}
+      paired_p_s2: {max: 0.05, key: headline.paired_p_s2, freeze_order: last,
+                    note: "PLACEHOLDER — exact test (Wilcoxon vs bootstrap CI), alpha,
+                           and correction pre-registered Phase 3 (D-N1-x) before any
+                           masked training finishes"}
+      c3_beats_c1_s2: {equals: true, key: headline.c3_beats_c1_s2, freeze_order: last,
+                       note: PLACEHOLDER — direction check at S2+; frozen with the test}
+
+  G_N1_3_no_clean_tax:
+    description: >
+      No-clean-tax: C3 (occlusion-aware trained) at S0 within tolerance of C1 at S0.
+      Provisional tolerance +0.02 minADE — frozen with G-N1-2 pre-registration.
+    frozen: false
+    depends_on: G_N1_2_headline
+    results:
+      tax: results/g_n1_3_clean_tax.json
+    criteria:
+      s0_minade_gap: {max: 0.02, key: tax.s0_minade_gap,
+                      note: PROVISIONAL — C3_S0.minade6 - C1_S0.minade6 (seed-mean)}
+
+  G_N1_4_ship:
+    description: >
+      Ship package: public repo, runnable demo script, README with ghost-car GIF
+      (license-guard-classified visual), degradation-curve headline, honesty labels
+      (custom masked-eval protocol stated), quickstart.
+    frozen: false
+    depends_on: G_N1_2_headline
+    results:
+      ship: results/g_n1_4_ship.json
+    criteria:
+      demo_runs: {equals: true, key: ship.demo_runs}
+      readme_complete: {equals: true, key: ship.readme_complete}
+      license_guard_green: {equals: true, key: ship.license_guard_green}
+
+  G_quality:
+    description: Code quality — enforced live by check_gates (pytest + ruff + coverage).
+    frozen: true
+    live: quality
+    criteria:
+      pytest: pass
+      ruff: clean
+      coverage_core: {min: 0.80, paths: [src/otraj]}

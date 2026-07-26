@@ -1,0 +1,39 @@
+N1 STATUS — 2026-07-26 (kickoff session 1; Phase 0 scaffold)
+
+STATE: Phase 0 COMPLETE (pending push verify). Phase 1 (eval-kit sanity, G-N1-0) starting.
+Ship target Sept 12.
+
+DONE THIS SESSION:
+- git init; default-deny .gitignore (data/, cache/, checkpoints/, *.parquet, all visuals);
+  handoff prompt kept local-only.
+- License guard ported from P1 D37/D41: per-file visual allowlist (empty), blob-ext +
+  2MB size-ceiling default-deny, AV2 parquet explicitly denied. Green on staged tree.
+- gates.yaml G-N1-0..4 (all UNFROZEN, provisional numerics annotated) + live G_quality;
+  scripts/check_gates.py ported (live-gate flag instead of hardcoded name).
+- tests: license guard (6) + gates-config sanity (4) — 10 pass; ruff clean.
+- uv venv py3.11 pinned: torch 2.13.0+cu126 (CUDA OK on 4060), av2, pytorch-lightning,
+  pytest/ruff toolchain; requirements.txt frozen (76 pins).
+- CI workflow: torch-free guard subset (ruff + license guard + gates-config).
+- LICENSE Apache-2.0 (D-N1-3); README stub with honesty labels; decision log D-N1-3/4.
+- Reviewer pass done (fresh-context subagent): 2 blockers fixed (requirements.txt local
+  path, status wording), branch renamed main. Remote link + push = final step of this
+  session (URL pre-approved: github.com/matus012/occlusion_forecast).
+
+OPEN (owner: Matúš; batched, non-blocking):
+1. RESOLVED: repo URL = github.com/matus012/occlusion_forecast.
+2. RESOLVED: license = Apache-2.0 (D-N1-3).
+3. Confirm PERUN request covers ~O(100) H200h N1 ceiling, or amend.
+4. P2 occlusion-stats export: machine-readable segment-stats JSON already emitted by P2,
+   or extract from P1 repo results/ in wk1? (Claude will attempt extraction either way.)
+5. AV2 download location/quota: ~60GB+ motion forecasting split — default plan is
+   data/av2/ on this drive; flag if it should live elsewhere.
+
+NEXT (Phase 1, autonomous):
+1. AV2 motion forecasting split download (log source, structural verification, SHA
+   manifest -> results/av2_verification.json).
+2. Clone forecast-mae into third_party/ (untracked), pin commit in a manifest; env deps.
+3. Score released FMAE checkpoint through official av2 eval kit on val; verify published
+   numbers from paper/repo (NOT context.md memory figures); freeze G-N1-0/G-N1-1
+   tolerances (D-N1-x). Fallback ladder QCNet -> SIMPL after 1 day honest debugging.
+
+BLOCKERS: none.
