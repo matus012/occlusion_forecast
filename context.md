@@ -181,3 +181,12 @@ otherwise; log as D-N1-3). [Resolved same day: Apache-2.0, see D-N1-3 below.]
   (NO PyG compiled deps), 4-GPU DDP, 50 epochs, small model (~30MB ckpt incl. optimizer)
   → same order as FMAE, O(10-30) H200h/run, 9-run matrix ≈ 100-270 H200h (fits/near-fits
   ceiling). SIMPL vendored untracked @ 2a33314.
+- D-N1-8 (2026-07-26): G-N1-0 PASSED and FROZEN. QCNet released ckpt scored through the
+  official av2 kit on ALL 24988 val scenarios (4060, 103 min): minADE6 0.7201 / minFDE6
+  1.2527 / MR6 0.1574 vs published 0.72/1.25/0.16 — deltas 0.0001/0.0027/0.0026, all
+  within the frozen 0.01 tolerance (2dp rounding band + margin). Our official-kit eval
+  path is validated. G-N1-1 tolerance freeze DEFERRED to the D-N1-7 baseline decision
+  (anchor model unknown until then); its provisional +0.05/+0.10 offsets stand. Eval env
+  notes: PyG 2.8 needed a module-level TargetBuilder forward-shim (no third_party edits);
+  QCNet preprocessing requires an ABSOLUTE dataset root (upstream path-join bug with
+  relative roots).

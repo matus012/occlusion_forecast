@@ -40,11 +40,17 @@ PHASE 1 PROGRESS (this session):
 - AV2 val split sync running in background (aws s3 --no-sign-request, public bucket,
   data/av2/val/, ~25k scenarios); train split queued next.
 
-NEXT (Phase 1, autonomous):
-1. Finish AV2 val sync; structural verification + SHA manifest -> results/av2_verification.json.
-2. .venv-qcnet env; score QCNet ckpt through official av2 eval kit on val; freeze G-N1-0
-   tolerance (D-N1-x). Then AV2 train split sync (for Phase 2).
-3. FMAE preprocess + overfit-100 smoke (Phase 2 start).
+G-N1-0: PASSED + FROZEN (D-N1-8, 2026-07-26). QCNet ckpt through official av2 kit,
+all 24988 val scenarios: 0.7201/1.2527/0.1574 vs published 0.72/1.25/0.16 — deltas
+<= 0.003, frozen tolerance 0.01. Eval path validated. AV2 val verified (24988 dirs,
+0 structural errors, SHA manifested). G-N1-1 freeze deferred to D-N1-7 decision.
+
+NEXT (autonomous):
+1. Finish AV2 train split sync (running, hours; resumable).
+2. FMAE preprocess + overfit-100 smoke in main venv (Phase 2 start) — FMAE still
+   provisional baseline pending D-N1-7; smoke work is wrap-and-import only.
+3. P2 occlusion segment stats extraction (Phase 3 prep, baseline-agnostic).
+4. Wk1 D-N1-7 comparison report (FMAE grant vs QCNet vs SIMPL) — user decides.
 
 TRIPWIRE (D-N1-7, user directive 2026-07-26): FMAE-as-training-baseline is PROVISIONAL.
 End of wk1: (a) license grant on the FMAE issue -> keep FMAE; (b) else cost out

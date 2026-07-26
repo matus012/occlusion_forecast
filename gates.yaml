@@ -21,17 +21,21 @@ gates:
       kit on val reproduces its published val numbers within tolerance. Anchor model =
       QCNet released checkpoint (D-N1-6: all FMAE checkpoint links dead; the gate
       validates OUR kit usage, not FMAE specifically). Blocks everything downstream.
-    frozen: false
+      FROZEN 2026-07-26 (D-N1-8): measured on all 24988 val scenarios — ours
+      0.7201/1.2527/0.1574 vs published 0.72/1.25/0.16 (deltas 0.0001/0.0027/0.0026).
+      Tolerance 0.01 = published-value 2dp rounding band (0.005) + margin; all three
+      measured deltas sit well inside it.
+    frozen: true
     results:
       ours: results/g_n1_0_checkpoint_eval.json
       published: results/qcnet_published_val.json
     criteria:
-      abs_delta_minade: {max: 0.02, between: [ours.minade6, published.minade6],
-                         note: PROVISIONAL — freeze from measurement (D-N1-x)}
-      abs_delta_minfde: {max: 0.05, between: [ours.minfde6, published.minfde6],
-                         note: PROVISIONAL}
+      abs_delta_minade: {max: 0.01, between: [ours.minade6, published.minade6],
+                         note: FROZEN 2026-07-26 from measurement (measured delta 0.0001)}
+      abs_delta_minfde: {max: 0.01, between: [ours.minfde6, published.minfde6],
+                         note: FROZEN 2026-07-26 (measured delta 0.0027)}
       abs_delta_mr: {max: 0.01, between: [ours.mr6, published.mr6],
-                     note: PROVISIONAL}
+                     note: FROZEN 2026-07-26 (measured delta 0.0026)}
 
   G_N1_1_repro:
     description: >

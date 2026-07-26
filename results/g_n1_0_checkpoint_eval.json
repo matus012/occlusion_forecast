@@ -1,0 +1,14 @@
+{
+  "model": "QCNet released checkpoint (results/qcnet_ckpt_manifest.json)",
+  "metric_authority": "av2.datasets.motion_forecasting.eval.metrics (official kit)",
+  "protocol": "clean val, no occlusion masking (G-N1-0 eval-kit sanity)",
+  "n_scenarios": 24988,
+  "minade6": 0.720105165239774,
+  "minfde6": 1.2527286716887631,
+  "mr6": 0.1573955498639347,
+  "miss_threshold_m": 2.0,
+  "seed": 2023,
+  "device": "cuda",
+  "wall_seconds": 6209.2,
+  "date": "2026-07-26"
+}

@@ -66,6 +66,7 @@ torch-cluster==1.6.3+pt27cu126
 torch-geometric==2.8.0.post1
 torch-scatter==2.1.2+pt27cu126
 torchmetrics==1.9.0
+torchvision==0.22.0+cu126
 tqdm==4.69.1
 typing-extensions==4.15.0
 tzdata==2026.3

@@ -1,8 +1,8 @@
 """G-N1-0 runner: score a released QCNet checkpoint through the OFFICIAL av2 eval kit.
 
 Runs inside .venv-qcnet (torch 2.7.0+cu126 + PyG). Metric AUTHORITY is
-av2.datasets.motion_forecasting.eval.metrics (official kit); QCNet's own
-torchmetrics numbers are collected as a cross-check only.
+av2.datasets.motion_forecasting.eval.metrics (official kit). QCNet's own
+torchmetrics are NOT run here; a separate val.py run can serve as cross-check.
 
 Frame note: QCNet predictions and targets are agent-centric. Rigid transforms
 preserve L2 distances, so ADE/FDE/MR computed in the agent frame are identical
@@ -37,6 +37,18 @@ from av2.datasets.motion_forecasting.eval.metrics import (  # noqa: E402
     compute_ade,
     compute_fde,
 )
+from transforms import TargetBuilder  # noqa: E402  (third_party/QCNet)
+
+
+class TargetBuilderCompat(TargetBuilder):
+    """PyG >= 2.4 makes BaseTransform.forward abstract; QCNet's TargetBuilder
+    (PyG 2.3 era) implements __call__ directly and never dispatches to forward,
+    so this delegation satisfies the ABC without recursion. Module-level so
+    Windows spawn workers can pickle it. third_party/ stays unmodified (D-N1-5).
+    """
+
+    def forward(self, data):
+        return TargetBuilder.__call__(self, data)
 
 SEED = 2023  # match QCNet's own val seed for the cross-check run
 MISS_THRESHOLD_M = 2.0
@@ -59,7 +71,6 @@ def main() -> int:
     from datasets import ArgoverseV2Dataset
     from predictors import QCNet
     from torch_geometric.loader import DataLoader
-    from transforms import TargetBuilder
 
     pl.seed_everything(SEED, workers=True)
     device = torch.device(args.device) if args.device else torch.device(
@@ -70,7 +81,7 @@ def main() -> int:
     model.eval().to(device)
     dataset = ArgoverseV2Dataset(
         root=str(args.root), split="val",
-        transform=TargetBuilder(model.num_historical_steps, model.num_future_steps),
+        transform=TargetBuilderCompat(model.num_historical_steps, model.num_future_steps),
     )
     loader = DataLoader(
         dataset, batch_size=args.batch_size, shuffle=False,
