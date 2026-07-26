@@ -45,11 +45,17 @@ all 24988 val scenarios: 0.7201/1.2527/0.1574 vs published 0.72/1.25/0.16 — de
 <= 0.003, frozen tolerance 0.01. Eval path validated. AV2 val verified (24988 dirs,
 0 structural errors, SHA manifested). G-N1-1 freeze deferred to D-N1-7 decision.
 
+DONE (late session): P2 stats extracted + mix re-derived (D-N1-9, flicker-dominated);
+per-pattern eval protocol logged (D-N1-10); visual state report rendered LOCALLY at
+reports/state_2026wk1/index.html (6 PNGs; generator scripts/state_report.py committed,
+rerun any time: main venv --sections p2,mask,dash,assemble; .venv-qcnet --sections
+scenario). Scenario sanity: QCNet minFDE 0.615m on val[0], frame inverse err 3e-6m.
+
 NEXT (autonomous):
-1. Finish AV2 train split sync (running, hours; resumable).
-2. FMAE preprocess + overfit-100 smoke in main venv (Phase 2 start) — FMAE still
-   provisional baseline pending D-N1-7; smoke work is wrap-and-import only.
-3. P2 occlusion segment stats extraction (Phase 3 prep, baseline-agnostic).
+1. Finish AV2 train split sync (running, ~59%; resumable).
+2. Phase 3 mask generator implementation (spec: D-N1-2 + D-N1-9 mix + D-N1-10 labels).
+3. FMAE preprocess + overfit-100 smoke (Phase 2 start) — baseline still provisional
+   pending D-N1-7; wrap-and-import only.
 4. Wk1 D-N1-7 comparison report (FMAE grant vs QCNet vs SIMPL) — user decides.
 
 TRIPWIRE (D-N1-7, user directive 2026-07-26): FMAE-as-training-baseline is PROVISIONAL.
