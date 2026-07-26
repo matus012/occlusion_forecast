@@ -166,3 +166,18 @@ otherwise; log as D-N1-3). [Resolved same day: Apache-2.0, see D-N1-3 below.]
   Until resolved: no FMAE-derived code beyond wrap-and-import experiments; masking engine
   (Phase 3) stays baseline-agnostic by design (operates on validity masks, not model
   internals) so it survives either outcome.
+- D-N1-7a (2026-07-26, user amendment): option (3) added to the wk1 comparison — SIMPL as
+  training baseline (pre-decided contingency #2). VERIFIED same day: MIT license; AV2
+  checkpoint SHIPPED IN-REPO (saved_models/simpl_av2_bezier_ckpt-fix.tar, SHA256 in
+  results/simpl_vendor_manifest.json — no link rot possible); checkpoint-matched AV2 val
+  numbers author-posted in issue #15 (minADE6 0.777 / minFDE6 1.452 / MR6 0.196 /
+  b-minFDE6 2.069; caveat: '-fix' ckpt is an author RETRAIN, original paper ckpt lost —
+  paper Table IV row slightly better, anchor to the author-posted ckpt-matched numbers);
+  per-timestep validity ingestion CONFIRMED (has_flags → PAD_OBS channel in the actor
+  feature tensor, simpl/av2_dataset.py:252) — hard requirement SATISFIED, with the honest
+  caveat that SIMPL's native convention nn-pads invalid positions at preprocess time
+  (flag+nn-pad, vs FMAE's flag+zero) — occlusion masking must follow the native convention
+  per-baseline, flag-flip is the cross-baseline invariant; training cost: plain PyTorch
+  (NO PyG compiled deps), 4-GPU DDP, 50 epochs, small model (~30MB ckpt incl. optimizer)
+  → same order as FMAE, O(10-30) H200h/run, 9-run matrix ≈ 100-270 H200h (fits/near-fits
+  ceiling). SIMPL vendored untracked @ 2a33314.

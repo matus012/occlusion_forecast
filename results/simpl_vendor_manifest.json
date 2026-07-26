@@ -1,0 +1,15 @@
+{
+  "repo": "https://github.com/HKUST-Aerial-Robotics/SIMPL",
+  "commit": "2a33314c92f42feee2b1b1b863f394672cd23eca",
+  "commit_date": "2024-06-19T00:53:23+08:00",
+  "license": "MIT (LICENSE file present, verified 2026-07-26)",
+  "vendored_at": "third_party/SIMPL (untracked; regenerate with: git clone <repo> && git checkout <commit>)",
+  "av2_checkpoint": {
+    "path": "third_party/SIMPL/saved_models/simpl_av2_bezier_ckpt-fix.tar (SHIPPED IN-REPO — no external link to rot)",
+    "sha256": "689f1e7c71129a9745b17dba998baf91120b578fe749cd413bf6564f6c911337",
+    "bytes_mb": 30.6,
+    "provenance": "author retrain (issue #15: original paper ckpt lost); author-posted AV2 val eval of THIS ckpt: minADE6 0.777, minFDE6 1.452, MR6 0.196, b-minFDE6 2.069"
+  },
+  "validity_mask_ingestion": "CONFIRMED — per-timestep has_flags stored in preprocessing (data_av2/av2_preprocess.py) and concatenated into the actor feature tensor as PAD_OBS channel (simpl/av2_dataset.py:252). Caveat: invalid positions are nearest-neighbor pre-padded at preprocess time (native convention), flag distinguishes real vs padded.",
+  "purpose": "D-N1-7 option (3) candidate training baseline — evaluation vendored copy, wrap-and-import if adopted"
+}

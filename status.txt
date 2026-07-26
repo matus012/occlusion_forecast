@@ -52,5 +52,22 @@ QCNet-switch vs own-code FMAE-finetune reimplementation (honest H200h + dev-time
 report comparison here with recommendation; USER DECIDES. Masking engine stays
 baseline-agnostic either way.
 - FMAE issue FILED: github.com/jchengai/forecast-mae/issues/25 (checkpoints + license).
+- PRELIMINARY cost-out data (lit-based, to be replaced by measurement):
+  QCNet: README states ~160GB GPU mem across 8x3090, batch 32; community-reported
+  multi-day training -> rough order 150-250 H200h per full train x 9 runs (3 arms x
+  3 seeds) = 1.4-2.2k H200h — ~15-20x OVER the O(100) ceiling. Even a cut matrix
+  (2 arms x 2 seeds) likely blows budget. QCNet-switch is only viable with a
+  drastically reduced claim scope.
+  FMAE: hours-scale on 4 GPUs -> O(10) H200h/run, matrix fits ceiling (as planned).
+  Own-code FMAE-finetune reimpl: dev-time risk (transformer encoder + pipeline from
+  paper spec), compute cost same as FMAE.
+  SIMPL (option 3, D-N1-7a, verified 2026-07-26): MIT license; AV2 ckpt SHIPPED IN-REPO
+  (no link rot; SHA256 manifested); ckpt-matched val numbers author-posted (0.777/1.452/
+  0.196 — '-fix' retrain, paper original lost); per-timestep validity ingestion CONFIRMED
+  (PAD_OBS channel in actor features); plain PyTorch, no PyG deps; est. O(10-30) H200h/run
+  -> 9-run matrix ~100-270 H200h. Caveat: native convention nn-pads invalid positions
+  (flag+nn-pad vs FMAE flag+zero) — flag-flip is the cross-baseline masking invariant.
+  Leaning (1-line): SIMPL is now the strongest no-license-grant option (in-repo ckpt
+  anchors G-N1-0/1, budget fits, masks plug in natively); full report end of wk1.
 
 BLOCKERS: none. (Push resolved — user pushed; origin/main tracking set.)
