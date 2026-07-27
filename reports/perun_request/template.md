@@ -1,0 +1,158 @@
+# PERUN (TUKE HPC) Allocation Request — Project N1: Occlusion-Aware Trajectory Forecasting on Argoverse 2
+
+**Applicant:** Matúš Filo, 3rd-year BSc "Intelligent Systems", TUKE FEI
+**Repository:** github.com/matus012/occlusion_forecast (public, Apache-2.0)
+**Request date:** {date}
+**Requested resources (summary):** {h200h_total} H200-hours, ~{preproc_h:.0f} CPU-node-hours (preprocessing), {storage_gb} GB scratch storage (details in §5)
+
+> Every table and every derived hour/GB figure in §3–§5 is generated from
+> committed measurement artifacts (`results/*.json`) by
+> `scripts/build_perun_report.py`, with sources cited at each table; §3.2's
+> review-record quantities cite the decision log (`context.md`, D-N1-11).
+
+---
+
+## 1. Project scope
+
+Trajectory forecasting for autonomous driving degrades when the observation
+history of an agent is partially hidden — occlusion by other vehicles,
+infrastructure, or sensor range. Public leaderboards evaluate only the
+fully-observed case. This project quantifies, on the Argoverse 2 Motion
+Forecasting benchmark (~250k real scenarios), how much a modern forecaster
+degrades under realistically structured occlusion of the 5-second observation
+history, and whether occlusion-aware training buys that robustness back.
+
+The headline deliverable is a **degradation curve**: forecast error (official
+AV2 metrics: minADE₆ / minFDE₆ / MR₆) versus occlusion severity (0–80% of the
+history masked), for three arms trained on identical data:
+
+* **C1** — clean-trained baseline (the robustness gap, i.e. the motivation),
+* **C2** — clean-trained + constant-velocity imputation (the "cheap fix" null),
+* **C3** — occlusion-aware trained (ours: occlusion applied as data
+  augmentation during training).
+
+Occlusion masks are not synthetic noise: their pattern mix, duration
+distribution and structure are fitted to per-agent visibility traces extracted
+from a prior CARLA multi-object-tracking project (205 occlusion segments,
+`results/p2_occlusion_stats.json`), and
+applied to AV2 as deterministic, manifest-pinned per-timestep validity masks.
+Baseline model: **SIMPL** (MIT license, ~2.6M parameters, checkpoint shipped
+in-repo by its authors) — deliberately compact so the scientific claim rests
+on a controlled comparison rather than leaderboard rank. The work feeds a
+bachelor-thesis chapter on hidden-state estimation; target completion
+mid-September 2026.
+
+## 2. Methodology and quality gates
+
+The experimental protocol was frozen **before** any training run:
+
+* **Deterministic eval masks** — every (scenario, severity) pair maps to a
+  unique mask via SHA-256 seeding (spec "N1-mask-v2"); all arms are evaluated
+  on bit-identical inputs. Committed manifests pin the spec; masks are
+  regenerable, never stored.
+* **Pattern taxonomy** — M1 contiguous block / M2 late-appearance prefix /
+  M3 flicker, mixed per the empirical CARLA-derived ratio (M1 0.40 / M2 0.05 /
+  M3 0.55); severities S0–S4 = 0/20/40/60/80% of the 50-step history;
+  headline regime R-A ("re-emerged": the last 0.5 s is always visible); a
+  stretch regime R-B ("still-occluded" through t=0) doubles the eval
+  conditions in the full matrix.
+* **Pre-registered statistics (gate G-N1-2)** — one-sided Wilcoxon signed-rank
+  on per-scenario paired minFDE₆ deltas (C1 − C3), ≥3 training seeds per arm,
+  Holm-Bonferroni over severities S2/S3/S4, α = 0.05; registered in the
+  repository (`gates.yaml`, decision D-N1-12) before any masked training
+  existed.
+* **No-clean-tax gate (G-N1-3)** — C3 must match C1 on unmasked data within a
+  pre-frozen tolerance.
+* **Metric authority** — only the official `av2` evaluation kit computes
+  reported metrics.
+* **License hygiene** — AV2 data and anything derived from it never enter the
+  public repository (guard-enforced: loaders, manifests and hashes only).
+
+## 3. Evidence of readiness (all local, RTX 4060 Laptop 8 GB)
+
+The pipeline is complete end-to-end at reduced scale; HPC is requested for
+scale, not development.
+
+**3.1 Eval-kit validation (gate G-N1-0, frozen).** A released QCNet
+checkpoint scored through the official av2 kit on all 24,988 validation
+scenarios reproduced the published values within 0.003 on every metric
+(minADE₆ {g0_minade:.4f} vs 0.72, minFDE₆ {g0_minfde:.4f} vs 1.25, MR₆
+{g0_mr:.4f} vs 0.16; `results/g_n1_0_checkpoint_eval.json`). Our usage of the
+metric authority is validated.
+
+**3.2 Mask engine, adversarially reviewed.** The mask generator was reviewed
+twice (first implementation rejected; fixes verified in re-review): 100%
+pattern-cohort stability across severities on the full validation split,
+collision-free seeding, placement distributional exactness (KS p = 1.000),
+property tests in CI (decision record D-N1-11, `context.md`).
+
+**3.3 Reduced-scale degradation curve (the headline figure, locally).**
+Both training arms were run at reduced scale on the 4060 — labeled
+**\*-local** throughout and never mixed with the full-scale gate arms:
+{local_train_desc}. Evaluated on {val_count} fixed validation scenarios under
+deterministic masks, S0–S4, regime R-A ({curve_files}). C2-local is not a
+third training run: it is the C1-local checkpoint evaluated with masked
+steps imputed and flagged valid (the "cheap fix" null), which is why its
+S0 row equals C1-local's by construction:
+
+{curve_table}
+
+{curve_reading}
+
+**3.4 Side-by-side inference video.** `scripts/inference_video.py` renders
+C1-local vs C3-local on identical masks (illustrative scenarios,
+hand-picked for visual legibility and labeled as such). Stills are attached to
+this PDF; full mp4/gif available on request (AV2 license keeps them out of
+the public repo). Local paths: {video_files}.
+
+## 4. Why the full matrix cannot run on the available 8 GB GPU (measured)
+
+SIMPL's authors train with per-GPU batch 16 on RTX 3090 (24 GB). Measured on
+the RTX 4060 Laptop (8 GB, TF32 on), `results/local_budget.json`:
+
+{vram_table}
+
+Batch 16 and even batch 12 exceed physical VRAM → shared-memory thrash
+(3–13 samples/s). The workable operating point is batch 8 at
+{bs8_steady:.0f} samples/s steady state. At that rate one full-scale training
+run (199,908 scenarios × 50 epochs ≈ 10.0M samples) costs
+**{days_per_run_4060:.1f} days**, and the pre-registered 9-run matrix
+(3 arms × 3 seeds) **{days_matrix_4060:.0f} days** of continuous single-GPU
+compute — before evaluation, re-runs, or the R4 sensitivity sweep. The laptop
+is also not a stable platform for multi-hour runs: during the two local
+training runs we measured recurring host-side throttle episodes that cut
+throughput to 2–3 samples/s for ~2 h stretches (epoch wall-clock varied
+12–130 min for C1-local and 11–158 min for C3-local, identical work per
+epoch; `results/local/train_c*_seed42.json`), which
+is one of the two reasons the local arms had to be time-box truncated to 6
+epochs in the first place. That is not a feasible thesis timeline; the local
+runs above are the honest maximum this hardware supports.
+
+## 5. Requested allocation (H200)
+
+Basis: measured per-sample training cost on the 4060
+({bs8_steady:.0f} samples/s), scaled to the full matrix, converted to H200
+throughput with a stated assumption band of {h200_factor_lo}–{h200_factor_hi}×
+per-GPU speedup over the laptop 4060 (small model, partially dataloader-bound;
+the band is deliberately conservative and will be calibrated by the pilot run
+below — we commit to reporting the measured factor back).
+
+{budget_table}
+
+| Item | Value |
+| --- | --- |
+| Total requested | **{h200h_total} H200-hours** |
+| Scratch storage | **{storage_gb} GB** ({storage_note}) |
+| Walltime per training run | {walltime_per_run} (single H200; conversion band applied to the measured batch-8 throughput — the pilot fixes the real batch/rate) |
+| Job shape | single-GPU jobs, 9 training runs + eval jobs; no multi-node requirement |
+| Pilot/calibration | {pilot_h200h} H200-h included: 1-epoch calibration run to fix the conversion factor before the matrix launches |
+
+Deliverables back to PERUN: measured H200 throughput report, the published
+degradation-curve study, and public repository artifacts (code, manifests,
+gate records — no AV2 data).
+
+---
+
+*Prepared by the applicant with local measurements; every table above is
+regenerated by `scripts/build_perun_report.py` from the cited
+`results/*.json` files.*
