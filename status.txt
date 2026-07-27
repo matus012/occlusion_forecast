@@ -1,54 +1,58 @@
-N1 STATUS — 2026-07-27 (session 2: D-N1-14 HPC committee package)
+N1 STATUS — 2026-07-27 (session 2 END: D-N1-14 HPC committee package READY)
 
-STATE: D-N1-7 RESOLVED (baseline = SIMPL, D-N1-13). HPC package (D-N1-14) in
-flight: C1-local training RUNNING (bg, ~5.5h, 20k x 20ep bs8 seed42); C3-local
-queued after it. Eval/curve/video/report harnesses BUILT + committed; eval path
-mechanically verified (masks reach model inputs). Ship target Sept 12.
+STATE: Package COMPLETE, awaiting owner edit + submission. Both *-local arms
+trained (6 epochs each, matched, D-N1-14b truncation), eval matrix + curve +
+video + PERUN request done; adversarial reviewer pass applied (D-N1-14c).
+Ship target Sept 12 unchanged.
 
-DONE THIS SESSION:
-- D-N1-13: baseline = SIMPL (user decision); context.md/status updated; FMAE
-  demoted to license-grant-AND-checkpoints-republished contingency.
-- D-N1-14a budget freeze BY MEASUREMENT (results/local_budget.json): bs16/bs12
-  spill 8GB VRAM (measured, 3-13 samp/s thrash); bs8 = 5GB/21 samp/s steady.
-  Local arms: 20k train (city-stratified prefix) x 20 epochs, dev 1k disjoint,
-  val subset 2.5k (pattern-cohort-stratified prefix), final-epoch ckpts, 1 seed.
-- Deterministic subset orderings + committed manifest (results/
-  local_subsets_manifest.json); full id lists local (results/local/, gitignored).
-- SIMPL features preprocessed: 21k train + 2.5k val (25-27 scen/s, 10 workers,
-  137KB/scen; 17 transient MemoryError failures backfilled — root cause:
-  concurrent training run; op rule adopted: never overlap train + preprocess).
-- otraj.masking.simpl_apply: native-convention occlusion application
-  (ffill/bfill parity, obs-window-only sources = no future leakage) + C2
-  CV/linear imputation; 13 unit tests, torch-free, all green.
-- scripts/: preprocess_local, train_local (C1/C3 arms, occl-aug via
-  draw_train_mask per epoch), eval_local (av2 kit authority, per-scenario
-  records + per-pattern slices), degradation_curve (watermarked headline +
-  per-pattern figs, bootstrap CIs, paired-delta summary), inference_video
-  (side-by-side C1 vs C3, identical masks, hidden-GT markers, auto-pick,
-  labeled illustrative), build_perun_report (every number from results/*.json,
-  Chrome-headless PDF), _simpl_compat (py3.11/torch-2.13 shims, zero
-  third_party edits).
-- reports/perun_request/template.md committed (text-only carve-out in
-  .gitignore); PDF + figures stay local.
+DELIVERABLES (all local paths):
+- reports/perun_request/request.pdf  <- EDIT + SUBMIT THIS (figures embedded)
+- reports/perun_request/request.md   (tracked, text-only twin)
+- reports/local_curves/degradation_curve_local.png (+ per-pattern appendix)
+- reports/videos/*.mp4|gif + stills/ (2 takes, M1/S3/R-A, labeled illustrative)
+- Regenerate everything: scripts/build_perun_report.py (numbers only from
+  results/*.json), scripts/degradation_curve.py, scripts/inference_video.py.
 
-RUNNING / NEXT (autonomous):
-1. C1-local train (bg) -> verify dev curve sane; spot-check S0-vs-S3 output
-   sensitivity of the trained ckpt before full eval.
-2. C3-local train (launch after C1; GPU serial).
-3. eval_local x {C1 native, C2 impute on C1 ckpt, C3 native} x S0-S4 R-A
-   on the fixed 2.5k val subset -> degradation_curve -> inference_video
-   (S3/M1 x2 + S4 take).
-4. build_perun_report -> request.md + request.pdf; reviewer pass (fresh-context
-   subagent) on number traceability; then notify user for edit+submit.
+HEADLINE NUMBERS (all *-local, 1 seed, 6 epochs, val subset 1500, R-A):
+- C1-local degrades minFDE6 5.481 -> 6.970 (+27%) S0->S4; MR6 0.60 -> 0.76.
+  The robustness gap (project motivation) is demonstrated at reduced scale.
+- C2-local (CV imputation on C1 ckpt; NOT a third training run) flattens the
+  curve to clean level for this under-trained model (max dev 0.007 m).
+- C3-local COLLAPSED to history-invariant (D-N1-14c; verified 1e-5 m output
+  sensitivity vs 65.7 m for C1; results/local/c3_collapse_verification.json).
+  Honestly reported in report/curve/video; C3-vs-C1 unanswerable at laptop
+  scale -> strengthens the HPC case; full protocol gains collapse monitoring.
+- PERUN ask: 260 H200h + ~2 CPU-node-h + 100 GB scratch (post-review numbers;
+  basis = frozen 21.0 samp/s from results/local_budget.json, H200 band 6-10x
+  stated as assumption with 5 H200h pilot calibration).
 
-BATCHED QUESTIONS (non-blocking; will proceed with stated defaults):
-1. H200 conversion band default 6-10x per-GPU vs laptop 4060 (stated as an
-   assumption; pilot calibration run included in the request). Override if
-   PERUN guidance dictates a different planning factor.
-2. Report attaches curve figures + video stills INSIDE the local PDF only;
-   public repo carries text-only request.md. Confirm this split is what you
-   want for the committee submission.
-3. Storage ask defaults to ~100GB scratch (raw AV2 60GB + full-split SIMPL
-   features ~31GB + ckpts). Adjust if PERUN quotas prefer a different shape.
+REVIEW RECORD: fresh-context opus reviewer, 14 findings, 3 BLOCKERs (all one
+root cause: best-epoch throughput substituted for frozen steady basis ->
+under-asked 30%). All BLOCKERs + MINORs fixed, rebuild verified. Honesty
+labels audited clean (truncation on every surface, collapse reported,
+single-seed framing, *-local never conflated with gate arms).
 
-BLOCKERS: none.
+TIME-BOX (D-N1-14b): user capped ~9h; epoch-13 target unreachable (snapshots
+only at 5/10/15 + 12-158 min epoch variance from host throttle episodes);
+both arms truncated at epoch 5 = 6 epochs, matched. Slight cap overrun due to
+C3's throttled 7.7h wall — trains/eval/report all inside; discovered-work
+(collapse diagnosis + reviewer fixes) added ~40 min.
+
+BATCHED QUESTIONS (non-blocking, defaults applied):
+1. H200 band 6-10x + pilot: override only if PERUN guidance dictates.
+2. PDF embeds AV2-derived figures and stays LOCAL/untracked; public repo has
+   text-only request.md. Flip only if the committee needs a repo link to the
+   PDF (then we need a license call on the stills).
+3. Storage ask 100 GB / CPU ~2 h: adjust to PERUN quota shapes if needed.
+4. C3 collapse follow-up for the REAL matrix: proposed mitigations to test on
+   HPC (lower LR for aug arm is NOT allowed by matched-arms rule — instead:
+   full 50-epoch schedule with anneal, 3 seeds, collapse monitoring, optional
+   curriculum p_occ ramp as a pre-registered variant). Flag if you want the
+   curriculum variant dropped/kept before the full matrix spec freezes.
+
+NEXT SESSION (after owner submits):
+1. paired_test.py (G-N1-2 implementation, Phase 4 pattern).
+2. R-B eval-path anchor caveat design (TRAJS_CTRS leakage note, D-N1-14 docs).
+3. PERUN pilot run spec (1-epoch calibration + collapse monitor hooks).
+
+BLOCKERS: none. Package awaits owner.

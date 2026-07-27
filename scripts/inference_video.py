@@ -131,7 +131,8 @@ def render_take(scene: dict, mask: np.ndarray, preds: dict, sev: str,
 
     fig, axes = plt.subplots(1, 2, figsize=(12.8, 6.4), dpi=100)
     arm_meta = [("C1-local", "clean-trained", C1_COLOR),
-                ("C3-local", "occlusion-aug trained", C3_COLOR)]
+                ("C3-local", "occl-aug — collapsed\n(history-invariant, D-N1-14c)",
+                 C3_COLOR)]
     for f_i, (phase, t) in enumerate(schedule):
         for ax, (arm, desc, color) in zip(axes, arm_meta, strict=True):
             ax.clear()
@@ -189,7 +190,7 @@ def render_take(scene: dict, mask: np.ndarray, preds: dict, sev: str,
                 if j:
                     ax.plot(gt_fut_scene[j - 1, 0], gt_fut_scene[j - 1, 1], "*",
                             color="#2ca02c", ms=12, zorder=5)
-            ax.set_title(f"{arm} — {desc}", color=color, fontsize=12)
+            ax.set_title(f"{arm} — {desc}", color=color, fontsize=10)
             # timeline mask bar
             bar_y = 0.965
             for k_step in range(OBS):
@@ -230,15 +231,18 @@ def render_take(scene: dict, mask: np.ndarray, preds: dict, sev: str,
 
 def auto_pick(eval_dir: Path, sev: str, pattern: str, features_dir: Path,
               min_travel_m: float, top: int) -> list[str]:
+    """Pick scenarios where the CLEAN-trained arm degrades most under the mask
+    (C1 at `sev` minus C1 at S0, per scenario) -- the demonstrated effect at
+    this reduced scale. (Picking by C1-vs-C3 gap would visually oversell the
+    collapsed C3-local arm, see D-N1-14c.)"""
     c1 = json.loads((eval_dir / "eval_C1-local_native.json").read_text("utf-8"))
-    c3 = json.loads((eval_dir / "eval_C3-local_native.json").read_text("utf-8"))
     c1s = {r["sid"]: r for r in c1["severities"][sev]["per_scenario"]}
-    c3s = {r["sid"]: r for r in c3["severities"][sev]["per_scenario"]}
+    c1s0 = {r["sid"]: r for r in c1["severities"]["S0"]["per_scenario"]}
     cands = []
     for sid, r in c1s.items():
-        if r["pattern"] != pattern or sid not in c3s:
+        if r["pattern"] != pattern or sid not in c1s0:
             continue
-        gap = r["minfde6"] - c3s[sid]["minfde6"]
+        gap = r["minfde6"] - c1s0[sid]["minfde6"]
         if gap <= 0:
             continue
         cands.append((gap, sid))

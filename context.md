@@ -304,3 +304,28 @@ otherwise; log as D-N1-3). [Resolved same day: Apache-2.0, see D-N1-3 below.]
   claim 20 epochs). Throttle episodes documented in the report as laptop
   instability evidence; HPC extrapolation uses best sustained unthrottled
   epoch rate (not throttled averages, which would inflate the ask).
+  [Superseded on review — see D-N1-14c(3): extrapolation basis reverted to the
+  FROZEN 21.0 samp/s steady rate; the best-epoch substitution was a reviewer
+  BLOCKER (contradicted the frozen artifact, mixed bases, under-asked ~30%).]
+- D-N1-14c (2026-07-27): FINDINGS + REVIEW OUTCOME, all reported not hidden.
+  (1) C3-local COLLAPSED to a history-invariant predictor: eval metrics
+  bit-identical across S0-S4; randomizing ALL actor-history features moves its
+  output 1e-5 m (C1-local: 65.7 m — same code paths mask-sensitive); actor
+  encoder alive (activation std 2.05) but fusion ignores actor content; loss
+  dipped to 1.08 then plateaued at 1.24. Verified NOT a harness bug.
+  Artifact: results/local/c3_collapse_verification.json. Consequence: the
+  C3-vs-C1 question is UNANSWERABLE at laptop scale; the full-scale protocol
+  gains a collapse-monitoring requirement (actor-feature sensitivity per epoch).
+  (2) C1-local degrades monotonically under masks (minFDE6 5.48→6.97, +27%,
+  S0→S4) — the motivation number exists at reduced scale; C2 (CV imputation on
+  the C1 ckpt) flattens the curve back to clean level for this under-trained
+  model.
+  (3) Fresh-context adversarial review of the PERUN request (opus): 3 BLOCKERs,
+  one root cause — best-epoch 27.3 samp/s substituted for the frozen 21.0
+  steady basis; fixed by reverting to results/local_budget.json as the sole
+  throughput authority. Ask corrected 200→260 H200h; also: CPU-hours added to
+  the summary, at-scale preproc rate (25.268), single-basis VRAM table,
+  205-not-223 segments, R-B named in §2, C2-not-a-third-run stated, per-run
+  hours to 1dp. Video scenario picking switched to largest-C1-degradation
+  (picking by C1−C3 gap would visually oversell the collapsed arm); C3 panel
+  labeled collapsed.

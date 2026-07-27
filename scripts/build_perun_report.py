@@ -76,13 +76,14 @@ def build_values(f_lo: float, f_hi: float, pilot_h: float) -> dict:
     bs8 = probe["train_bs8"]
     steady = float(bs8["samples_per_s_steady"])
 
-    # measured steady from the REAL c1 run: best sustained full epoch. The
-    # laptop shows intermittent host-side throttling episodes (2-3 samp/s for
-    # hours); those are a laptop pathology documented in §4, not the
-    # hardware's representative rate — using them would inflate the H200 ask.
-    walls = [e for e in c1_train["epochs_log"] if e["epoch"] > 0]
-    if walls:
-        steady = round(max(e["samples_per_s"] for e in walls), 1)
+    # Throughput basis = the FROZEN budget artifact's steady-state rate
+    # (results/local_budget.json, bs8 probe: 21.0 samples/s). Reviewer finding
+    # (2026-07-27): an earlier draft substituted the best single epoch of the
+    # C1 run (27.3) relabeled "steady" — that contradicted the frozen artifact,
+    # mixed measurement bases in the VRAM table, and under-asked the
+    # allocation by ~30%. The full-run averages (C1 5.96 / C3 4.31 samp/s,
+    # throttle episodes included) are reported as the instability evidence,
+    # never as the capability basis.
 
     # ---- curve table ----
     hdr = ("| Severity | C1-local minADE₆/minFDE₆/MR₆ | C2-local (imputation) "
@@ -96,30 +97,49 @@ def build_values(f_lo: float, f_hi: float, pilot_h: float) -> dict:
         rows.append(f"| {sev} | " + " | ".join(cells) + " |")
     curve_table = "\n".join([hdr, *rows])
 
-    # ---- auto reading (factual, from curve_summary) ----
-    d3 = summary["deltas"]["C1-local_minus_C3_S3"]
+    # ---- auto reading (factual, from curve_summary + collapse record) ----
+    collapse = _j(LOCAL / "c3_collapse_verification.json")
+    c1_s0 = evals["C1-local"]["severities"]["S0"]["aggregate"]["minfde6"]
+    c1_s4 = evals["C1-local"]["severities"]["S4"]["aggregate"]["minfde6"]
+    c2_devs = [abs(evals["C2-local"]["severities"][s]["aggregate"]["minfde6"] - c1_s0)
+               for s in SEVS]
+    c3_flat = evals["C3-local"]["severities"]["S0"]["aggregate"]["minfde6"]
     d0 = summary["deltas"]["C1-local_minus_C3_S0"]
-    c1_s3 = evals["C1-local"]["severities"]["S3"]["aggregate"]["minfde6"]
-    rel = 100.0 * d3["mean_minfde6_delta"] / c1_s3
+    d4 = summary["deltas"]["C1-local_minus_C3_S4"]
+    rc = collapse["measurements"]["randomize_all_actor_features_output_diff_m"]
     curve_reading = (
         f"Reading (single seed, descriptive only — the pre-registered G-N1-2 "
-        f"test requires ≥3 seeds/arm): at S3, occlusion-aware training improves "
-        f"paired per-scenario minFDE₆ by {d3['mean_minfde6_delta']:.3f} m "
-        f"({rel:.0f}% of C1-local's {c1_s3:.3f} m; bootstrap 95% CI "
-        f"[{d3['boot95_lo']:.3f}, {d3['boot95_hi']:.3f}], "
-        f"`results/local/curve_summary.json`). At S0 (no occlusion) the paired "
-        f"difference is {d0['mean_minfde6_delta']:+.3f} m (CI "
-        f"[{d0['boot95_lo']:.3f}, {d0['boot95_hi']:.3f}]) — the no-clean-tax "
-        f"property G-N1-3 will be tested at full scale.")
+        f"test requires ≥3 seeds/arm). Three results: **(i)** the clean-trained "
+        f"arm degrades monotonically under occlusion, minFDE₆ {c1_s0:.3f} m at "
+        f"S0 → {c1_s4:.3f} m at S4 (+{100 * (c1_s4 / c1_s0 - 1):.0f}%) — the "
+        f"robustness gap this project quantifies exists already at 6-epoch "
+        f"reduced scale. **(ii)** Constant-velocity imputation (C2) restores "
+        f"the input statistics almost exactly for this under-trained model "
+        f"(max deviation from clean {max(c2_devs):.3f} m across severities). "
+        f"**(iii)** The occlusion-aug arm COLLAPSED to a history-invariant "
+        f"predictor (flat {c3_flat:.3f} m at every severity; verified: "
+        f"randomizing ALL actor-history features moves its output "
+        f"{rc['c3']:.0e} m vs {rc['c1']:.1f} m for C1-local — "
+        f"`results/local/c3_collapse_verification.json`). C3-local is "
+        f"therefore worse than C1-local everywhere (paired ΔminFDE₆ "
+        f"{d0['mean_minfde6_delta']:+.3f} m at S0, narrowing to "
+        f"{d4['mean_minfde6_delta']:+.3f} m at S4 as C1 degrades toward C3's "
+        f"flat line). We report the collapse rather than hiding it: it shows "
+        f"the occlusion-aware question CANNOT be answered at laptop scale — "
+        f"6 of 20 epochs, 10% data, LR never annealed — and adds a concrete "
+        f"requirement (collapse monitoring, ≥3 seeds) to the full-scale runs "
+        f"this request funds.")
 
-    # ---- VRAM table ----
+    # ---- VRAM table (single measurement basis: probe incl. warmup, plus
+    # steady-state where it exists — spilled configs never reach steady) ----
     vram_table = (
-        "| Batch | samples/s | peak VRAM | verdict |\n|---|---|---|---|\n"
+        "| Batch | samples/s (probe, incl. warmup) | steady | peak VRAM | verdict |"
+        "\n|---|---|---|---|---|\n"
         f"| 16 (authors' per-GPU) | {probe['train_bs16']['samples_per_s_incl_warmup']} "
-        f"| {probe['train_bs16']['peak_vram_mb']} MB | {probe['train_bs16']['verdict']} |\n"
+        f"| — | {probe['train_bs16']['peak_vram_mb']} MB | {probe['train_bs16']['verdict']} |\n"
         f"| 12 | {probe['train_bs12']['samples_per_s_incl_warmup']} "
-        f"| {probe['train_bs12']['peak_vram_mb']} MB | {probe['train_bs12']['verdict']} |\n"
-        f"| 8 | {steady} (steady, full run) "
+        f"| — | {probe['train_bs12']['peak_vram_mb']} MB | {probe['train_bs12']['verdict']} |\n"
+        f"| 8 | {bs8['samples_per_s_incl_warmup']} | {steady} "
         f"| {bs8['peak_vram_mb']} MB | {bs8['verdict']} |")
 
     # ---- budget math ----
@@ -140,8 +160,10 @@ def build_values(f_lo: float, f_hi: float, pilot_h: float) -> dict:
     # full eval: 9 run-ckpts x (5 sev x 2 regimes) x full val + per-pattern reuse
     full_eval_h_4060 = FULL_VAL * 10 * N_RUNS * s_per_scen / 3600
     eval_hi = full_eval_h_4060 / f_lo
-    preproc_h = (FULL_TRAIN + FULL_VAL) / probe[
-        "preprocess_scen_per_s_10workers"]["train"] / 3600
+    # at-scale preprocessing rate: the largest measured batch, not the probe
+    preproc_recs = _j(LOCAL / "preproc_rate.json")
+    preproc_rate = max(preproc_recs, key=lambda r: r["n_processed"])["scen_per_s"]
+    preproc_h = (FULL_TRAIN + FULL_VAL) / preproc_rate / 3600
 
     r4_hi = h_run_hi  # R4 sensitivity: one arm re-eval + one extra aug run equiv
     contingency = 0.15
@@ -155,17 +177,19 @@ def build_values(f_lo: float, f_hi: float, pilot_h: float) -> dict:
         "| Cost item | Basis (measured) | 4060 hours | H200 hours "
         f"(÷{f_lo}–{f_hi}) |\n|---|---|---|---|\n"
         f"| 1 training run ({FULL_TRAIN:,} × {FULL_EPOCHS} ep) | "
-        f"{steady} samples/s | {h_per_run_4060:.0f} h | "
+        f"{steady} samples/s (results/local_budget.json) | {h_per_run_4060:.1f} h | "
         f"{h_run_lo:.0f}–{h_run_hi:.0f} h |\n"
         f"| 9-run matrix (3 arms × 3 seeds) | — | "
         f"{h_per_run_4060 * N_RUNS:.0f} h | {train_lo:.0f}–{train_hi:.0f} h |\n"
-        f"| Full masked-eval matrix (9 ckpts × 10 conditions × {FULL_VAL:,}) | "
-        f"{s_per_scen * 1000:.1f} ms/scenario | {full_eval_h_4060:.0f} h | "
+        f"| Full masked-eval matrix (9 ckpts × 5 severities × 2 regimes × "
+        f"{FULL_VAL:,}) | {s_per_scen * 1000:.1f} ms/scenario "
+        f"(derived: Σ wall_seconds / Σ scenario-evals over the three local "
+        f"eval JSONs) | {full_eval_h_4060:.0f} h | "
         f"{full_eval_h_4060 / f_hi:.0f}–{eval_hi:.0f} h |\n"
         f"| R4 sensitivity sweep (1 arm, v1-prior mix) | = 1 run | "
-        f"{h_per_run_4060:.0f} h | {h_run_lo:.0f}–{h_run_hi:.0f} h |\n"
+        f"{h_per_run_4060:.1f} h | {h_run_lo:.0f}–{h_run_hi:.0f} h |\n"
         f"| Preprocessing (CPU-side, {FULL_TRAIN + FULL_VAL:,} scenarios) | "
-        f"{probe['preprocess_scen_per_s_10workers']['train']} scen/s (10 proc) | "
+        f"{preproc_rate} scen/s at scale (results/local/preproc_rate.json) | "
         f"{preproc_h:.1f} h | CPU nodes |\n"
         f"| Pilot calibration | 1 epoch | — | {pilot_h:.0f} h |\n"
         f"| Contingency ({int(contingency * 100)}%) + total | — | — | "
@@ -193,7 +217,7 @@ def build_values(f_lo: float, f_hi: float, pilot_h: float) -> dict:
     video_files = ", ".join(f"`reports/videos/{v.name}`" for v in vids) or "(pending)"
 
     return {
-        "date": "2026-07-28",
+        "date": "2026-07-27",
         "g0_minade": g0["minade6"], "g0_minfde": g0["minfde6"], "g0_mr": g0["mr6"],
         "local_train_desc": local_train_desc,
         "val_count": evals["C1-local"]["val_count"],
@@ -208,6 +232,7 @@ def build_values(f_lo: float, f_hi: float, pilot_h: float) -> dict:
         "storage_note": f"raw AV2 ≈60 GB + SIMPL features ≈{feat_gb:.0f} GB "
                         "(137 KB/scenario measured) + checkpoints/logs",
         "walltime_per_run": _fmt_h(h_run_hi),
+        "preproc_h": preproc_h,
         "pilot_h200h": pilot_h,
     }
 

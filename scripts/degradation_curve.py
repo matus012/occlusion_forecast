@@ -96,7 +96,8 @@ def main() -> None:
     n = evals["C1-local"]["severities"]["S0"]["aggregate"]["n"]
     fig.suptitle(
         f"SIMPL under deterministic occlusion masks (N1-mask-v2), regime R-A, "
-        f"val subset n={n}, 1 seed — *-local arms", fontsize=11)
+        f"val subset n={n}, 1 seed, 6-epoch truncated arms (D-N1-14b) — *-local",
+        fontsize=11)
     fig.text(0.01, 0.01,
              "R-A severity labels understate forecast-relevant information loss "
              "(recency discount, D-N1-11d). Bands: seeded bootstrap 95% CI of the mean.",
