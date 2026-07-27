@@ -280,3 +280,13 @@ otherwise; log as D-N1-3). [Resolved same day: Apache-2.0, see D-N1-3 below.]
       from MEASURED local throughput extrapolated to 3 arms × 3 seeds × full data on
       H200s, with measured 8GB-VRAM infeasibility evidence. Factual tone; user edits
       and submits. [Measurement freezes appended below as sub-entries.]
+- D-N1-14a (2026-07-27, frozen by measurement — results/local_budget.json):
+  local budget = train prefix 20,000 (city-stratified) + dev slice 1,000 (disjoint
+  monitoring only, no model selection — FINAL-epoch ckpt both arms) + val prefix
+  2,500 (pattern-cohort-stratified), 20 epochs, batch 8, seed 42, TF32.
+  Measured basis: SIMPL bs16 (authors' per-GPU setting) allocates 8.66GB > 8GB
+  physical → shared-memory thrash (3 samp/s); bs12 spills too (8.5GB); bs8 = 5.0GB
+  peak, ~21 samp/s steady → ~5.5h/arm. Preprocessing 25-27 scen/s (10 workers),
+  137KB/scenario. LR polyline milestones scaled 50→20 epochs ([0,2,14,16]).
+  Op note: training and preprocessing NEVER run concurrently (16GB RAM; measured
+  CUDA host-side OOM + 17 preprocess MemoryErrors when overlapped, both recovered).

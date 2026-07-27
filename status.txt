@@ -1,87 +1,54 @@
-N1 STATUS — 2026-07-27 (kickoff session 1, continuing)
+N1 STATUS — 2026-07-27 (session 2: D-N1-14 HPC committee package)
 
-STATE: Phases 0-1 COMPLETE (G-N1-0 PASSED+FROZEN). Phase 3 mask engine COMPLETE
-(generator + manifests committed, twice-reviewed; G-N1-2 test PRE-REGISTERED D-N1-12).
-Phase 2 (baseline train) blocked only on D-N1-7 baseline decision (user) + PERUN.
-AV2 val+train fully synced; train SHA verification running. Ship target Sept 12.
+STATE: D-N1-7 RESOLVED (baseline = SIMPL, D-N1-13). HPC package (D-N1-14) in
+flight: C1-local training RUNNING (bg, ~5.5h, 20k x 20ep bs8 seed42); C3-local
+queued after it. Eval/curve/video/report harnesses BUILT + committed; eval path
+mechanically verified (masks reach model inputs). Ship target Sept 12.
 
 DONE THIS SESSION:
-- git init; default-deny .gitignore (data/, cache/, checkpoints/, *.parquet, all visuals);
-  handoff prompt kept local-only.
-- License guard ported from P1 D37/D41: per-file visual allowlist (empty), blob-ext +
-  2MB size-ceiling default-deny, AV2 parquet explicitly denied. Green on staged tree.
-- gates.yaml G-N1-0..4 (all UNFROZEN, provisional numerics annotated) + live G_quality;
-  scripts/check_gates.py ported (live-gate flag instead of hardcoded name).
-- tests: license guard (6) + gates-config sanity (4) — 10 pass; ruff clean.
-- uv venv py3.11 pinned: torch 2.13.0+cu126 (CUDA OK on 4060), av2, pytorch-lightning,
-  pytest/ruff toolchain; requirements.txt frozen (76 pins).
-- CI workflow: torch-free guard subset (ruff + license guard + gates-config).
-- LICENSE Apache-2.0 (D-N1-3); README stub with honesty labels; decision log D-N1-3/4.
-- Reviewer pass done (fresh-context subagent): 2 blockers fixed (requirements.txt local
-  path, status wording), branch renamed main. Remote link + push = final step of this
-  session (URL pre-approved: github.com/matus012/occlusion_forecast).
+- D-N1-13: baseline = SIMPL (user decision); context.md/status updated; FMAE
+  demoted to license-grant-AND-checkpoints-republished contingency.
+- D-N1-14a budget freeze BY MEASUREMENT (results/local_budget.json): bs16/bs12
+  spill 8GB VRAM (measured, 3-13 samp/s thrash); bs8 = 5GB/21 samp/s steady.
+  Local arms: 20k train (city-stratified prefix) x 20 epochs, dev 1k disjoint,
+  val subset 2.5k (pattern-cohort-stratified prefix), final-epoch ckpts, 1 seed.
+- Deterministic subset orderings + committed manifest (results/
+  local_subsets_manifest.json); full id lists local (results/local/, gitignored).
+- SIMPL features preprocessed: 21k train + 2.5k val (25-27 scen/s, 10 workers,
+  137KB/scen; 17 transient MemoryError failures backfilled — root cause:
+  concurrent training run; op rule adopted: never overlap train + preprocess).
+- otraj.masking.simpl_apply: native-convention occlusion application
+  (ffill/bfill parity, obs-window-only sources = no future leakage) + C2
+  CV/linear imputation; 13 unit tests, torch-free, all green.
+- scripts/: preprocess_local, train_local (C1/C3 arms, occl-aug via
+  draw_train_mask per epoch), eval_local (av2 kit authority, per-scenario
+  records + per-pattern slices), degradation_curve (watermarked headline +
+  per-pattern figs, bootstrap CIs, paired-delta summary), inference_video
+  (side-by-side C1 vs C3, identical masks, hidden-GT markers, auto-pick,
+  labeled illustrative), build_perun_report (every number from results/*.json,
+  Chrome-headless PDF), _simpl_compat (py3.11/torch-2.13 shims, zero
+  third_party edits).
+- reports/perun_request/template.md committed (text-only carve-out in
+  .gitignore); PDF + figures stay local.
 
-OPEN (owner: Matúš; batched, non-blocking):
-1. RESOLVED: repo URL = github.com/matus012/occlusion_forecast.
-2. RESOLVED: license = Apache-2.0 (D-N1-3).
-3. Confirm PERUN request covers ~O(100) H200h N1 ceiling, or amend.
-4. P2 occlusion-stats export: machine-readable segment-stats JSON already emitted by P2,
-   or extract from P1 repo results/ in wk1? (Claude will attempt extraction either way.)
-5. AV2 download location/quota: ~60GB+ motion forecasting split — default plan is
-   data/av2/ on this drive; flag if it should live elsewhere.
+RUNNING / NEXT (autonomous):
+1. C1-local train (bg) -> verify dev curve sane; spot-check S0-vs-S3 output
+   sensitivity of the trained ckpt before full eval.
+2. C3-local train (launch after C1; GPU serial).
+3. eval_local x {C1 native, C2 impute on C1 ckpt, C3 native} x S0-S4 R-A
+   on the fixed 2.5k val subset -> degradation_curve -> inference_video
+   (S3/M1 x2 + S4 take).
+4. build_perun_report -> request.md + request.pdf; reviewer pass (fresh-context
+   subagent) on number traceability; then notify user for edit+submit.
 
-PHASE 1 PROGRESS (this session):
-- forecast-mae vendored (untracked) @ cb86ea9, pinned in results/fmae_vendor_manifest.json.
-- FINDING (D-N1-5): FMAE has NO declared license -> never redistributable; wrap-and-import
-  only. Published val numbers read from pinned README -> results/fmae_published_val.json
-  (fine-tune 0.7117/1.408/0.178; scratch 0.7214/1.430/0.187).
-- FINDING (D-N1-6): all 3 FMAE checkpoint links DEAD (OneDrive 404; no mirrors anywhere).
-  Adaptation: G-N1-0 eval-kit sanity re-anchored to QCNet released checkpoint (live,
-  Apache-2.0, val 0.72/1.25/0.16 -> results/qcnet_published_val.json). FMAE stays the
-  training baseline. QCNet ckpt downloaded (93MB, SHA256 in results/qcnet_ckpt_manifest.json).
-- AV2 val split sync running in background (aws s3 --no-sign-request, public bucket,
-  data/av2/val/, ~25k scenarios); train split queued next.
+BATCHED QUESTIONS (non-blocking; will proceed with stated defaults):
+1. H200 conversion band default 6-10x per-GPU vs laptop 4060 (stated as an
+   assumption; pilot calibration run included in the request). Override if
+   PERUN guidance dictates a different planning factor.
+2. Report attaches curve figures + video stills INSIDE the local PDF only;
+   public repo carries text-only request.md. Confirm this split is what you
+   want for the committee submission.
+3. Storage ask defaults to ~100GB scratch (raw AV2 60GB + full-split SIMPL
+   features ~31GB + ckpts). Adjust if PERUN quotas prefer a different shape.
 
-G-N1-0: PASSED + FROZEN (D-N1-8, 2026-07-26). QCNet ckpt through official av2 kit,
-all 24988 val scenarios: 0.7201/1.2527/0.1574 vs published 0.72/1.25/0.16 — deltas
-<= 0.003, frozen tolerance 0.01. Eval path validated. AV2 val verified (24988 dirs,
-0 structural errors, SHA manifested). G-N1-1 freeze deferred to D-N1-7 decision.
-
-DONE (late session): P2 stats extracted + mix re-derived (D-N1-9, flicker-dominated);
-per-pattern eval protocol logged (D-N1-10); visual state report rendered LOCALLY at
-reports/state_2026wk1/index.html (6 PNGs; generator scripts/state_report.py committed,
-rerun any time: main venv --sections p2,mask,dash,assemble; .venv-qcnet --sections
-scenario). Scenario sanity: QCNet minFDE 0.615m on val[0], frame inverse err 3e-6m.
-
-NEXT (autonomous):
-1. Finish AV2 train split sync (running, ~59%; resumable).
-2. Phase 3 mask generator implementation (spec: D-N1-2 + D-N1-9 mix + D-N1-10 labels).
-3. FMAE preprocess + overfit-100 smoke (Phase 2 start) — baseline still provisional
-   pending D-N1-7; wrap-and-import only.
-4. Wk1 D-N1-7 comparison report (FMAE grant vs QCNet vs SIMPL) — user decides.
-
-TRIPWIRE (D-N1-7, user directive 2026-07-26): FMAE-as-training-baseline is PROVISIONAL.
-End of wk1: (a) license grant on the FMAE issue -> keep FMAE; (b) else cost out
-QCNet-switch vs own-code FMAE-finetune reimplementation (honest H200h + dev-time box),
-report comparison here with recommendation; USER DECIDES. Masking engine stays
-baseline-agnostic either way.
-- FMAE issue FILED: github.com/jchengai/forecast-mae/issues/25 (checkpoints + license).
-- PRELIMINARY cost-out data (lit-based, to be replaced by measurement):
-  QCNet: README states ~160GB GPU mem across 8x3090, batch 32; community-reported
-  multi-day training -> rough order 150-250 H200h per full train x 9 runs (3 arms x
-  3 seeds) = 1.4-2.2k H200h — ~15-20x OVER the O(100) ceiling. Even a cut matrix
-  (2 arms x 2 seeds) likely blows budget. QCNet-switch is only viable with a
-  drastically reduced claim scope.
-  FMAE: hours-scale on 4 GPUs -> O(10) H200h/run, matrix fits ceiling (as planned).
-  Own-code FMAE-finetune reimpl: dev-time risk (transformer encoder + pipeline from
-  paper spec), compute cost same as FMAE.
-  SIMPL (option 3, D-N1-7a, verified 2026-07-26): MIT license; AV2 ckpt SHIPPED IN-REPO
-  (no link rot; SHA256 manifested); ckpt-matched val numbers author-posted (0.777/1.452/
-  0.196 — '-fix' retrain, paper original lost); per-timestep validity ingestion CONFIRMED
-  (PAD_OBS channel in actor features); plain PyTorch, no PyG deps; est. O(10-30) H200h/run
-  -> 9-run matrix ~100-270 H200h. Caveat: native convention nn-pads invalid positions
-  (flag+nn-pad vs FMAE flag+zero) — flag-flip is the cross-baseline masking invariant.
-  Leaning (1-line): SIMPL is now the strongest no-license-grant option (in-repo ckpt
-  anchors G-N1-0/1, budget fits, masks plug in natively); full report end of wk1.
-
-BLOCKERS: none. (Push resolved — user pushed; origin/main tracking set.)
+BLOCKERS: none.
