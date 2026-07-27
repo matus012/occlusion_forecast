@@ -3,7 +3,7 @@
 **Applicant:** Matúš Filo, 3rd-year BSc "Intelligent Systems", TUKE FEI
 **Repository:** github.com/matus012/occlusion_forecast (public, Apache-2.0)
 **Request date:** 2026-07-27
-**Requested resources (summary):** 260 H200-hours, ~2 CPU-node-hours (preprocessing), 100 GB scratch storage (details in §5)
+**Requested resources (summary):** 260 H200-hours base + itemized contingency to a 350 H200-hour band, ~2 CPU-node-hours (preprocessing), 100 GB scratch storage (details in §5)
 
 > Every table and every derived hour/GB figure in §3–§5 is generated from
 > committed measurement artifacts (`results/*.json`) by
@@ -63,6 +63,18 @@ The experimental protocol was frozen **before** any training run:
   existed.
 * **No-clean-tax gate (G-N1-3)** — C3 must match C1 on unmasked data within a
   pre-frozen tolerance.
+* **Collapse monitor (gate G-N1-5, added after the local finding in §3.3)** —
+  a history-sensitivity probe (replace all agent-history features with noise;
+  measure prediction displacement; `scripts/history_sensitivity_probe.py`)
+  runs at every training snapshot of every arm; an arm that fails it is
+  reported as collapsed and excluded from gates regardless of its metrics.
+  Local reference: healthy arm 52.5 m median displacement, collapsed arm
+  8e-6 m (`results/local/probe_c1_seed42.json`, `probe_c3_seed42.json`).
+* **C3 design response to the collapse (D-N1-14d)** — the full-matrix C3 arm
+  uses a curriculum p_occ ramp 0 → 0.5 over the first 20% of epochs as the
+  PRIMARY mitigation (final augmentation distribution unchanged); a fixed
+  p_occ = 0.25 arm is the pre-declared CONTINGENCY, costed as an itemized
+  line in §5 and spent only if the curriculum arm also collapses.
 * **Metric authority** — only the official `av2` evaluation kit computes
   reported metrics.
 * **License hygiene** — AV2 data and anything derived from it never enter the
@@ -155,12 +167,15 @@ below — we commit to reporting the measured factor back).
 | R4 sensitivity sweep (1 arm, v1-prior mix) | = 1 run | 132.2 h | 13–22 h |
 | Preprocessing (CPU-side, 224,896 scenarios) | 25.268 scen/s at scale (results/local/preproc_rate.json) | 2.5 h | CPU nodes |
 | Pilot calibration | 1 epoch | — | 5 h |
-| Contingency (15%) + total | — | — | **260 h** (upper band) |
+| General contingency (15%) → base total | — | — | **260 h** (upper band) |
+| Collapse-mitigation contingency arm (p_occ=0.25, 3 seeds — used ONLY if the primary curriculum-C3 collapses; §2) | = 3 runs | 397 h | 40–66 h |
+| Repeat of one failed/collapsed run | = 1 run | 132.2 h | 13–22 h |
+| **Total requested band (base + itemized contingency)** | — | — | **350 h** |
 
 | Item | Value |
 | --- | --- |
-| Total requested | **260 H200-hours** |
-| Scratch storage | **100 GB** (raw AV2 ≈60 GB + SIMPL features ≈31 GB (137 KB/scenario measured) + checkpoints/logs) |
+| Total requested | **260 H200-hours base; 350 H200-hours including the itemized collapse-mitigation contingency** (each line justified in the table above — no unitemized padding) |
+| Scratch storage | **100 GB** (raw AV2 ≈60 GB + SIMPL features ≈31 GB (137 KB/scenario measured) + checkpoints/logs). The dataset is re-synced cluster-side from the public AV2 bucket (no upload from the applicant); all scratch content is reproducible and deletable at any time. |
 | Walltime per training run | 22.0 h (single H200; conversion band applied to the measured batch-8 throughput — the pilot fixes the real batch/rate) |
 | Job shape | single-GPU jobs, 9 training runs + eval jobs; no multi-node requirement |
 | Pilot/calibration | 5.0 H200-h included: 1-epoch calibration run to fix the conversion factor before the matrix launches |

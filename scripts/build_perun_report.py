@@ -169,6 +169,14 @@ def build_values(f_lo: float, f_hi: float, pilot_h: float) -> dict:
     contingency = 0.15
     total_hi = (train_hi + eval_hi + r4_hi + pilot_h) * (1 + contingency)
     h200h_total = int(round(total_hi / 10) * 10)
+    # D-N1-14d itemized contingency (owner directive: no silent padding —
+    # each line justified): the collapse-mitigation CONTINGENCY arm
+    # (p_occ=0.25, 3 seeds; the curriculum ramp is the PRIMARY mitigation and
+    # is already inside the 9-run matrix as the C3 design) + one repeat run
+    # for a failed/collapsed arm.
+    mitig_hi = 3 * h_run_hi
+    repeat_hi = h_run_hi
+    grand_total = int(round((total_hi + mitig_hi + repeat_hi) / 10) * 10)
 
     feat_gb = (FULL_TRAIN + FULL_VAL) * 137 / 1e6
     storage_gb = int(round((60 + feat_gb + 10) / 10) * 10)
@@ -192,8 +200,15 @@ def build_values(f_lo: float, f_hi: float, pilot_h: float) -> dict:
         f"{preproc_rate} scen/s at scale (results/local/preproc_rate.json) | "
         f"{preproc_h:.1f} h | CPU nodes |\n"
         f"| Pilot calibration | 1 epoch | — | {pilot_h:.0f} h |\n"
-        f"| Contingency ({int(contingency * 100)}%) + total | — | — | "
-        f"**{h200h_total} h** (upper band) |")
+        f"| General contingency ({int(contingency * 100)}%) → base total | — | — | "
+        f"**{h200h_total} h** (upper band) |\n"
+        f"| Collapse-mitigation contingency arm (p_occ=0.25, 3 seeds — used ONLY "
+        f"if the primary curriculum-C3 collapses; §2) | = 3 runs | "
+        f"{3 * h_per_run_4060:.0f} h | {3 * h_run_lo:.0f}–{mitig_hi:.0f} h |\n"
+        f"| Repeat of one failed/collapsed run | = 1 run | {h_per_run_4060:.1f} h | "
+        f"{h_run_lo:.0f}–{repeat_hi:.0f} h |\n"
+        f"| **Total requested band (base + itemized contingency)** | — | — | "
+        f"**{grand_total} h** |")
 
     c1w = c1_train.get("total_wall_s", 0) / 3600
     c3w = c3_train.get("total_wall_s", 0) / 3600
@@ -224,6 +239,7 @@ def build_values(f_lo: float, f_hi: float, pilot_h: float) -> dict:
         "curve_files": curve_files, "curve_table": curve_table,
         "curve_reading": curve_reading, "video_files": video_files,
         "vram_table": vram_table, "bs8_steady": steady,
+        "grand_total": grand_total,
         "days_per_run_4060": days_per_run_4060,
         "days_matrix_4060": days_matrix_4060,
         "h200_factor_lo": f_lo, "h200_factor_hi": f_hi,

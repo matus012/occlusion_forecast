@@ -112,6 +112,29 @@ gates:
       readme_complete: {equals: true, key: ship.readme_complete}
       license_guard_green: {equals: true, key: ship.license_guard_green}
 
+  G_N1_5_collapse_monitor:
+    description: >
+      Collapse monitor (D-N1-14d, owner directive after the D-N1-14c C3-local
+      collapse): history-sensitivity probe evaluated at EVERY training snapshot
+      of EVERY arm in the full matrix. Probe (scripts/history_sensitivity_probe.py,
+      formalizing the D-N1-14c diagnostic): on a fixed 50-scenario probe set
+      (first 50 of the val-subset ordering), replace the entire ACTORS feature
+      tensor with N(0, 5^2) noise and measure the max |delta| of the predicted
+      trajectories; probe value = median over the 50 scenarios; arm value =
+      min over snapshots with epoch >= 1. Reference points: healthy C1-local
+      65.7 m, collapsed C3-local 1e-5 m (results/local/c3_collapse_verification.json).
+      AN ARM FAILING THIS GATE IS DEAD ON ARRIVAL REGARDLESS OF ITS METRICS —
+      its results are reported as collapsed, never entered into G-N1-2/3.
+      Threshold PROVISIONAL until the PERUN pilot freezes it.
+    frozen: false
+    results:
+      probe: results/g_n1_5_collapse_monitor.json
+    criteria:
+      min_probe_disp_m: {min: 1.0, key: probe.min_probe_disp_m,
+                         note: "PROVISIONAL — freeze after PERUN pilot; separates
+                                measured healthy (65.7) from collapsed (1e-5)
+                                by >4 orders of magnitude either side"}
+
   G_quality:
     description: Code quality — enforced live by check_gates (pytest + ruff + coverage).
     frozen: true

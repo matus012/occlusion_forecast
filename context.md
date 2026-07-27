@@ -329,3 +329,29 @@ otherwise; log as D-N1-3). [Resolved same day: Apache-2.0, see D-N1-3 below.]
   hours to 1dp. Video scenario picking switched to largest-C1-degradation
   (picking by C1−C3 gap would visually oversell the collapsed arm); C3 panel
   labeled collapsed.
+- D-N1-14d (2026-07-27, owner answers to the status.txt batch):
+  (1) PERUN ask = honest 260 H200h base + ITEMIZED contingency (+~90 H200h:
+      collapse-mitigation contingency arm p_occ=0.25 × 3 seeds ≈ 66h upper +
+      one repeat run ≈ 22h) → 350 H200h total band; no silent padding.
+  (2) PDF split confirmed: request.pdf + AV2-derived figures local/gitignored;
+      builder + request.md committed; owner submits the PDF personally.
+  (3) Storage: 100GB scratch; report states dataset re-syncs cluster-side from
+      the public bucket (no upload) and scratch is reproducible/deletable.
+  (4) CURRICULUM PROMOTED into the full-matrix spec as the C3 design response
+      to D-N1-14c: PRIMARY mitigation = curriculum p_occ ramp 0→0.5 over the
+      first 20% of epochs (final aug distribution unchanged, so D-N1-2 train
+      semantics hold at steady state); CONTINGENCY = fixed p_occ=0.25 arm
+      (the itemized budget line, spent only if curriculum-C3 also collapses).
+  (5) NEW GATE G-N1-5 collapse monitor (gates.yaml): history-sensitivity
+      probe (scripts/history_sensitivity_probe.py — ACTORS tensor replaced
+      with N(0,5²) noise, median max-displacement over a fixed 50-scenario
+      probe set) at EVERY snapshot of EVERY arm; failing arm = dead on
+      arrival regardless of metrics, excluded from G-N1-2/3, reported as
+      collapsed. Provisional threshold 1.0 m (measured: healthy C1-local
+      52.5 m, collapsed C3-local 7.6e-6 m — probe artifacts
+      results/local/probe_c{1,3}_seed42.json); freeze after PERUN pilot.
+  (6) Push of the 6 package commits approved and executed.
+  (7) Video polish amendment: BEV restyle (dark, road polygons, oriented
+      agent boxes, gradient fans, occlusion vignette, HUD); C3 panel kept in
+      the committee PDF ONLY if it reads as a collapse illustration, else
+      dropped in favor of C1-degradation-only visuals.
