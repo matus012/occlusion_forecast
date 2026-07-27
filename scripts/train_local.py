@@ -228,9 +228,9 @@ def main() -> None:
               f"wall={ep_wall / 60:.1f}min lr={lr:.2e}", flush=True)
 
         if epoch in {round(args.epochs * f) for f in (0.25, 0.5, 0.75)}:
-            save_ckpt(net, optimizer.opt, epoch, str(ckpt_dir), f"{run_name}_e{epoch}.tar")
+            save_ckpt(net, optimizer, epoch, str(ckpt_dir), f"{run_name}_e{epoch}.tar")
 
-    save_ckpt(net, optimizer.opt, args.epochs - 1, str(ckpt_dir), f"{run_name}.tar")
+    save_ckpt(net, optimizer, args.epochs - 1, str(ckpt_dir), f"{run_name}.tar")
     log["final_ckpt"] = str(ckpt_dir / f"{run_name}.tar")
     log_path.write_text(json.dumps(log, indent=2), encoding="utf-8")
     print(f"[done] {run_name}: {(time.time() - t_start) / 3600:.2f} h total")
