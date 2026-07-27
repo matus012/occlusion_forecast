@@ -117,11 +117,16 @@ S0 row equals C1-local's by construction:
 
 Reading (single seed, descriptive only — the pre-registered G-N1-2 test requires ≥3 seeds/arm). Three results: **(i)** the clean-trained arm degrades monotonically under occlusion, minFDE₆ 5.481 m at S0 → 6.970 m at S4 (+27%) — the robustness gap this project quantifies exists already at 6-epoch reduced scale. **(ii)** Constant-velocity imputation (C2) restores the input statistics almost exactly for this under-trained model (max deviation from clean 0.007 m across severities). **(iii)** The occlusion-aug arm COLLAPSED to a history-invariant predictor (flat 7.833 m at every severity; verified: randomizing ALL actor-history features moves its output 1e-05 m vs 65.7 m for C1-local — `results/local/c3_collapse_verification.json`). C3-local is therefore worse than C1-local everywhere (paired ΔminFDE₆ -2.352 m at S0, narrowing to -0.863 m at S4 as C1 degrades toward C3's flat line). We report the collapse rather than hiding it: it shows the occlusion-aware question CANNOT be answered at laptop scale — 6 of 20 epochs, 10% data, LR never annealed — and adds a concrete requirement (collapse monitoring, ≥3 seeds) to the full-scale runs this request funds.
 
-**3.4 Side-by-side inference video.** `scripts/inference_video.py` renders
-C1-local vs C3-local on identical masks (illustrative scenarios,
-hand-picked for visual legibility and labeled as such). Stills are attached to
-this PDF; full mp4/gif available on request (AV2 license keeps them out of
-the public repo). Local paths: `reports/videos/09669770_S3_c1_vs_c3.mp4`, `reports/videos/a6146f53_S3_c1_vs_c3.mp4`.
+**3.4 Inference visualizations.** `scripts/inference_video.py` renders
+BEV-styled side-by-side videos (C1-local vs C3-local, identical masks;
+illustrative scenarios, hand-picked for visual legibility and labeled as
+such). The stills attached to this PDF show C1-local on the SAME scenario
+with and without occlusion — the degradation effect isolated. The C3-local
+panel is deliberately omitted from the attached stills: with the collapsed
+arm (§3.3) a fans frame visually misreads as "two similar methods"; the
+full videos, where the C3 panel is captioned as the collapse illustration,
+are available on request (AV2 license keeps them out of the public repo).
+Local paths: `reports/videos/09669770_S3_c1_vs_c3.mp4`, `reports/videos/a6146f53_S3_c1_vs_c3.mp4`.
 
 ## 4. Why the full matrix cannot run on the available 8 GB GPU (measured)
 

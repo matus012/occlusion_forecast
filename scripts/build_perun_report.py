@@ -259,7 +259,11 @@ def render(md_text: str, embed_figs: bool) -> str:
     if embed_figs:
         blocks = []
         curve_dir = REPO / "reports" / "local_curves"
-        stills = sorted((REPO / "reports" / "videos" / "stills").glob("*.png"))
+        # D-N1-14d(7): only the C1-degradation stills go to the committee —
+        # side-by-side fans frames with the collapsed C3 arm visually misread
+        # as "two similar methods" rather than a collapse illustration.
+        stills = sorted((REPO / "reports" / "videos" / "stills")
+                        .glob("*_c1_degradation.png"))
         for p in [curve_dir / "degradation_curve_local.png",
                   curve_dir / "degradation_per_pattern_local.png", *stills]:
             if p.exists():

@@ -111,11 +111,16 @@ S0 row equals C1-local's by construction:
 
 {curve_reading}
 
-**3.4 Side-by-side inference video.** `scripts/inference_video.py` renders
-C1-local vs C3-local on identical masks (illustrative scenarios,
-hand-picked for visual legibility and labeled as such). Stills are attached to
-this PDF; full mp4/gif available on request (AV2 license keeps them out of
-the public repo). Local paths: {video_files}.
+**3.4 Inference visualizations.** `scripts/inference_video.py` renders
+BEV-styled side-by-side videos (C1-local vs C3-local, identical masks;
+illustrative scenarios, hand-picked for visual legibility and labeled as
+such). The stills attached to this PDF show C1-local on the SAME scenario
+with and without occlusion — the degradation effect isolated. The C3-local
+panel is deliberately omitted from the attached stills: with the collapsed
+arm (§3.3) a fans frame visually misreads as "two similar methods"; the
+full videos, where the C3 panel is captioned as the collapse illustration,
+are available on request (AV2 license keeps them out of the public repo).
+Local paths: {video_files}.
 
 ## 4. Why the full matrix cannot run on the available 8 GB GPU (measured)
 
