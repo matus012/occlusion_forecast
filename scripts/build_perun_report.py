@@ -76,10 +76,13 @@ def build_values(f_lo: float, f_hi: float, pilot_h: float) -> dict:
     bs8 = probe["train_bs8"]
     steady = float(bs8["samples_per_s_steady"])
 
-    # measured steady from the REAL c1 run if available (better than probe):
+    # measured steady from the REAL c1 run: best sustained full epoch. The
+    # laptop shows intermittent host-side throttling episodes (2-3 samp/s for
+    # hours); those are a laptop pathology documented in §4, not the
+    # hardware's representative rate — using them would inflate the H200 ask.
     walls = [e for e in c1_train["epochs_log"] if e["epoch"] > 0]
     if walls:
-        steady = round(sum(e["samples_per_s"] for e in walls) / len(walls), 1)
+        steady = round(max(e["samples_per_s"] for e in walls), 1)
 
     # ---- curve table ----
     hdr = ("| Severity | C1-local minADE₆/minFDE₆/MR₆ | C2-local (imputation) "
@@ -170,9 +173,17 @@ def build_values(f_lo: float, f_hi: float, pilot_h: float) -> dict:
 
     c1w = c1_train.get("total_wall_s", 0) / 3600
     c3w = c3_train.get("total_wall_s", 0) / 3600
+    ep_c1 = c1_train.get("epochs_trained", c1_train["epochs"])
+    ep_c3 = c3_train.get("epochs_trained", c3_train["epochs"])
+    if ep_c1 != ep_c3:
+        raise ValueError(f"arm epoch mismatch: C1 {ep_c1} vs C3 {ep_c3} — "
+                         "matched arms are mandatory (D-N1-14b)")
+    trunc = (f" ({ep_c1} of a {c1_train['epochs']}-epoch schedule — time-boxed "
+             "truncation D-N1-14b, identical for both arms, LR not yet annealed)"
+             if c1_train.get("truncated") else "")
     local_train_desc = (
         f"{c1_train['train_count']:,} city-stratified scenarios × "
-        f"{c1_train['epochs']} epochs, batch {c1_train['batch_size']}, 1 seed, "
+        f"{ep_c1} epochs{trunc}, batch {c1_train['batch_size']}, 1 seed, "
         f"wall-clock {c1w:.1f} h (C1-local) / {c3w:.1f} h (C3-local, "
         f"p_occ=0.5, empirical mix) — `results/local/train_c*_seed42.json`")
 

@@ -121,6 +121,10 @@ def main() -> None:
     ap.add_argument("--val-interval", type=int, default=5)
     ap.add_argument("--max-iters", type=int, default=0,
                     help="probe mode: stop after N iterations, save nothing")
+    ap.add_argument("--stop-after-epoch", type=int, default=-1,
+                    help="D-N1-14b time-box: stop after this epoch completes "
+                         "(LR schedule still built from --epochs, so a "
+                         "truncated run matches a truncated full-schedule run)")
     ap.add_argument("--features-dir", type=Path,
                     default=REPO / "data" / "simpl_features" / "local")
     args = ap.parse_args()
@@ -230,10 +234,20 @@ def main() -> None:
         if epoch in {round(args.epochs * f) for f in (0.25, 0.5, 0.75)}:
             save_ckpt(net, optimizer, epoch, str(ckpt_dir), f"{run_name}_e{epoch}.tar")
 
-    save_ckpt(net, optimizer, args.epochs - 1, str(ckpt_dir), f"{run_name}.tar")
+        if epoch == args.stop_after_epoch:
+            log["truncated"] = True
+            log["truncation_note"] = (
+                f"D-N1-14b time-box: stopped after epoch {epoch} "
+                f"({epoch + 1} trained epochs of the {args.epochs}-epoch schedule)")
+            break
+
+    epochs_trained = log["epochs_log"][-1]["epoch"] + 1
+    log["epochs_trained"] = epochs_trained
+    save_ckpt(net, optimizer, epochs_trained - 1, str(ckpt_dir), f"{run_name}.tar")
     log["final_ckpt"] = str(ckpt_dir / f"{run_name}.tar")
     log_path.write_text(json.dumps(log, indent=2), encoding="utf-8")
-    print(f"[done] {run_name}: {(time.time() - t_start) / 3600:.2f} h total")
+    print(f"[done] {run_name}: {epochs_trained} epochs, "
+          f"{(time.time() - t_start) / 3600:.2f} h total")
 
 
 if __name__ == "__main__":

@@ -290,3 +290,17 @@ otherwise; log as D-N1-3). [Resolved same day: Apache-2.0, see D-N1-3 below.]
   137KB/scenario. LR polyline milestones scaled 50→20 epochs ([0,2,14,16]).
   Op note: training and preprocessing NEVER run concurrently (16GB RAM; measured
   CUDA host-side OOM + 17 preprocess MemoryErrors when overlapped, both recovered).
+- D-N1-14b (2026-07-27, user time-box override): total remaining wall capped ~9h.
+  C1-local epoch times measured 12-130 min (two ~2h host-side throttle episodes);
+  snapshots exist only at epochs 5/10/15, so the user's epoch-13 target is
+  unreachable within the cap under mandatory matched arms (e10 path projects
+  8-15h median >9h). RESOLUTION: both arms truncate at epoch 5 snapshot =
+  6 trained epochs of the 20-epoch schedule (LR at plateau 1e-3, never annealed
+  — identical trajectory for both arms; noted in every report surface).
+  C1-local-final = c1_seed42_e5.tar (canonicalized); C3-local runs the identical
+  truncated schedule via --stop-after-epoch 5. Eval val subset shrunk to 1,500
+  (same prefix for all arms); video reduced to 2 takes, M1/S3/R-A only. All
+  *-local labels + report text carry the actual epoch count (no surface may
+  claim 20 epochs). Throttle episodes documented in the report as laptop
+  instability evidence; HPC extrapolation uses best sustained unthrottled
+  epoch rate (not throttled averages, which would inflate the ask).
