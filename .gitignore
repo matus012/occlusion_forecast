@@ -1,0 +1,95 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Data — AV2 motion forecasting split and anything derived from it NEVER enters
+# history (AV2 license; enforced by tests/test_license_guard.py). Loaders,
+# manifests, SHA256 records, and download docs only.
+data/
+cache/
+checkpoints/
+lightning_logs/
+logs/
+runs/
+weights/
+*.ckpt
+*.pth
+*.pt
+*.tar
+*.onnx
+*.engine
+*.npz
+*.npy
+!tests/fixtures/**/*.npz
+# AV2 scenarios/maps are parquet — default-deny anywhere in the tree
+*.parquet
+*.feather
+*.arrow
+*.pkl
+*.pickle
+*.h5
+*.hdf5
+
+# Visuals: default-deny. Tracked visuals require an explicit allowlist entry in
+# tests/test_license_guard.py (D41 pattern from P1) — human-classified only.
+*.mp4
+*.gif
+*.png
+*.jpg
+*.jpeg
+*.bmp
+*.webp
+*.avi
+*.webm
+
+# results: keep metric JSONs, ignore raw dumps
+results/**/raw/
+results/**/*.log
+
+# vendored third-party (Phase 1: forecast-mae pinned by commit manifest, not tracked)
+third_party/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# local
+HARD_FAIL
+gate_report.txt
+
+# local meta (session handoff prompt stays untracked)
+n1_handoff_prompt.md
+
+# per-file dataset SHA manifests (large; aggregate + manifest-hash live in results/av2_verification.json)
+results/av2_manifests/
+
+# Phase 3 per-scenario occlusion-mask pattern labels (large, regenerable via
+# otraj.masking.manifest.build_labels(); committable summaries with spec_hash
+# + a sha256 pointer to these live in results/mask_manifests/ itself)
+results/mask_manifests/local/
+
+# local state reports (AV2-derived pixels assumed non-committable; guard classifies later)
+reports/*
+# D-N1-15 RGB demo: feasibility spike + build report. Text-only (sizes, log IDs,
+# commands, decisions) — the AV2-derived stills and clips they REFERENCE live in
+# reports/rgb_spike/ and reports/videos/rgb/ and stay local. Same
+# whitelist-by-exact-filename discipline (`reports/*.md` would sweep in local state reports).
+!reports/rgb_demo_feasibility.md
+!reports/rgb_demo_build.md
+# README figure: a pure matplotlib plot of results/pilot_summary.json (no AV2 pixels)
+!reports/figures/
+reports/figures/*
+!reports/figures/pilot_degradation.png
+results/local/

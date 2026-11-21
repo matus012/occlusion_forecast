@@ -1,0 +1,116 @@
+{
+  "description": "Local pilot: SIMPL on Argoverse 2 val subset, minADE6/minFDE6/MR6 (official av2 kit) vs share of the 5 s history hidden. Aggregates only, copied from the local per-scenario eval JSONs (not committed: they list per-scenario results).",
+  "scale": "1 seed per arm, 6 of 20 scheduled epochs (best checkpoint epoch index 5), 20,000 of 199,908 training scenarios (~1/10), RTX 4060 laptop",
+  "regime": "R-A (agent re-emerges)",
+  "severity_hidden_share": {
+    "S0": 0.0,
+    "S1": 0.2,
+    "S2": 0.4,
+    "S3": 0.6,
+    "S4": 0.8
+  },
+  "arms": {
+    "C1": {
+      "what": "clean-trained SIMPL, history masked as-is",
+      "source_file": "results/local/eval_C1-local_native.json",
+      "source_sha256": "ba2e33a7f3bd1541bed5d932dfbad05c02b848fd7a786103ec28aa2b9c1d9772",
+      "n_val_scenarios": 1500,
+      "ckpt_epoch": 5,
+      "by_severity": {
+        "S0": {
+          "minade6": 2.4718,
+          "minfde6": 5.481,
+          "mr6": 0.604
+        },
+        "S1": {
+          "minade6": 2.7007,
+          "minfde6": 5.7799,
+          "mr6": 0.666
+        },
+        "S2": {
+          "minade6": 2.9155,
+          "minfde6": 6.0145,
+          "mr6": 0.7
+        },
+        "S3": {
+          "minade6": 3.173,
+          "minfde6": 6.3945,
+          "mr6": 0.7447
+        },
+        "S4": {
+          "minade6": 3.7066,
+          "minfde6": 6.97,
+          "mr6": 0.7647
+        }
+      }
+    },
+    "C2": {
+      "what": "same clean checkpoint, masked steps filled by constant-velocity imputation",
+      "source_file": "results/local/eval_C2-local_impute.json",
+      "source_sha256": "3b557ba391d64793ec2ebcae99372acd6279ac5b480a9ade9aaaab5d8c228221",
+      "n_val_scenarios": 1500,
+      "ckpt_epoch": 5,
+      "by_severity": {
+        "S0": {
+          "minade6": 2.4718,
+          "minfde6": 5.481,
+          "mr6": 0.604
+        },
+        "S1": {
+          "minade6": 2.4708,
+          "minfde6": 5.4816,
+          "mr6": 0.6047
+        },
+        "S2": {
+          "minade6": 2.4717,
+          "minfde6": 5.4811,
+          "mr6": 0.5993
+        },
+        "S3": {
+          "minade6": 2.4725,
+          "minfde6": 5.4813,
+          "mr6": 0.6007
+        },
+        "S4": {
+          "minade6": 2.4699,
+          "minfde6": 5.4875,
+          "mr6": 0.5993
+        }
+      }
+    },
+    "C3": {
+      "what": "occlusion-augmented training, history masked as-is (collapsed, see c3_collapse_verification.json)",
+      "source_file": "results/local/eval_C3-local_native.json",
+      "source_sha256": "5887da5490512ddc9c01f36c4c54111c1df3c84e81ef391b185fe2ed23471f55",
+      "n_val_scenarios": 1500,
+      "ckpt_epoch": 5,
+      "by_severity": {
+        "S0": {
+          "minade6": 4.1642,
+          "minfde6": 7.8333,
+          "mr6": 0.854
+        },
+        "S1": {
+          "minade6": 4.1642,
+          "minfde6": 7.8333,
+          "mr6": 0.854
+        },
+        "S2": {
+          "minade6": 4.1642,
+          "minfde6": 7.8333,
+          "mr6": 0.854
+        },
+        "S3": {
+          "minade6": 4.1642,
+          "minfde6": 7.8333,
+          "mr6": 0.854
+        },
+        "S4": {
+          "minade6": 4.1642,
+          "minfde6": 7.8333,
+          "mr6": 0.854
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "finding": "D-N1-14c: C3-local (occlusion-aug, 6-epoch truncated schedule) collapsed to a history-invariant predictor",
+  "date": "2026-07-27",
+  "measurements": {
+    "eval_matrix": "identical aggregate metrics to 4 decimals across S0-S4 (eval_C3-local_native.json)",
+    "s0_vs_s4_output_diff_m": [0.0, 0.0, 0.0, 0.0, 0.0],
+    "randomize_all_actor_features_output_diff_m": {"c3": 1e-05, "c1": 65.70177},
+    "actor_net_output_std": {"c3": 2.052, "c1": 1.681},
+    "interpretation": "actor encoder still produces varying activations; the fusion stage learned to ignore actor content entirely (predictions driven by lane geometry + anchors only)",
+    "loss_history": "C3 train loss dipped to 1.08 (epoch 1) then rose and plateaued at 1.24; C1 descended monotonically to 0.68"
+  },
+  "verdict": "training-dynamics collapse under the occlusion-aug objective at reduced scale (10% data, 6 of 20 epochs, LR plateau 1e-3 never annealed) -- NOT a harness bug: identical eval code paths show strong mask sensitivity for C1-local (5-51 m output shifts)",
+  "implication": "the C3-vs-C1 comparison is unanswerable at local scale; motivates the full-schedule multi-seed HPC matrix (and adds collapse-monitoring to the full-run protocol)"
+}

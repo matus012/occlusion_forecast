@@ -1,0 +1,34 @@
+{
+  "spec": "D-N1-15 RGB demo takes. Selected from results/rgb_demo_scenes.json (480 candidates over 40 AV2-sensor val logs, ranked on vis*span x traffic density x parked-row/intersection geometry x history visibility). Re-render against any checkpoint with:  python scripts/render_rgb_demo.py --takes results/rgb_demo_takes.json --ckpt <path> --ckpt-label <label>",
+  "scene_source": "results/rgb_demo_scenes.json",
+  "takes": [
+    {
+      "name": "A",
+      "log": "0b86f508-5df9-4a46-bc59-5b9536dbde9f",
+      "cam": "ring_rear_left",
+      "focal": "c14c6c6a-0bc8-4579-b83b-2df9e3842869",
+      "why": "highest composite (3232): fan and GT visible 95% of the future, history 100%, 16 moving vehicles, intersection geometry. Longest clean rolling take."
+    },
+    {
+      "name": "B",
+      "log": "2c652f9e-8db8-3572-aa49-fae1344a875b",
+      "cam": "ring_front_left",
+      "focal": "f447e33b-cc66-4561-a03d-b84a1df97ee1",
+      "why": "only take with 100% visibility on BOTH future and history; 21 moving vehicles, intersection. Front camera, so it reads as a dashcam view."
+    },
+    {
+      "name": "C",
+      "log": "19f53e16-9f99-3035-9672-7e860f3b0048",
+      "cam": "ring_rear_left",
+      "focal": "08e86edf-3b40-4609-bbeb-f58150903879",
+      "why": "densest traffic in the 40-log pool by 2x (43 fully-observed moving vehicles), intersection, history 100% visible."
+    },
+    {
+      "name": "D",
+      "log": "25e5c600-36fe-3245-9cc0-40ef91620c22",
+      "cam": "ring_rear_right",
+      "focal": "63777d1b-3aeb-4d08-86f8-ed07a2501254",
+      "why": "strongest occlusion geometry: 24 parked vehicles within 30 m of the focal path, focal travels 136.5 m. Lower future visibility (0.52) is the cost of that geometry and is the point, not a defect."
+    }
+  ]
+}

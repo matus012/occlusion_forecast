@@ -1,0 +1,145 @@
+# N1 quality gates — scripts/check_gates.py is the executable interpretation.
+# Ported from P1 (ws/100_occlusion_mot) gate discipline.
+#
+# Semantics:
+# - A criterion is {min: x} or {max: x} against a key in the gate's results JSON,
+#   or {rel_min/rel_max: {source: <file>:<key>, offset: <f>}} resolved at check time,
+#   or {max: x, between: [a.key, b.key]} for absolute deltas.
+# - frozen: false + missing results  -> gate reports PENDING (loop continues, NEVER hard-fails).
+# - frozen: false + results present -> evaluated advisorily; freezing = setting frozen: true
+#   and replacing provisional numbers with measured ones (commit message "G-N1-x: freeze").
+# - ALL numeric tolerances below are PROVISIONAL (UNFROZEN) until G-N1-0 measurement:
+#   G-N1-0/1 tolerances freeze after the released-checkpoint eval (Phase 1);
+#   G-N1-2 statistical test pre-registers in Phase 3 BEFORE any masked training finishes.
+# - Hard failure: only via a HARD_FAIL marker file in repo root (check_gates exits 2).
+version: 1
+
+gates:
+  G_N1_0_evalkit:
+    description: >
+      Eval-kit sanity: a RELEASED checkpoint scored through the OFFICIAL av2-api eval
+      kit on val reproduces its published val numbers within tolerance. Anchor model =
+      QCNet released checkpoint (D-N1-6: all FMAE checkpoint links dead; the gate
+      validates OUR kit usage, not FMAE specifically). Blocks everything downstream.
+      FROZEN 2026-07-26 (D-N1-8): measured on all 24988 val scenarios — ours
+      0.7201/1.2527/0.1574 vs published 0.72/1.25/0.16 (deltas 0.0001/0.0027/0.0026).
+      Tolerance 0.01 = published-value 2dp rounding band (0.005) + margin; all three
+      measured deltas sit well inside it.
+    frozen: true
+    results:
+      ours: results/g_n1_0_checkpoint_eval.json
+      published: results/qcnet_published_val.json
+    criteria:
+      abs_delta_minade: {max: 0.01, between: [ours.minade6, published.minade6],
+                         note: FROZEN 2026-07-26 from measurement (measured delta 0.0001)}
+      abs_delta_minfde: {max: 0.01, between: [ours.minfde6, published.minfde6],
+                         note: FROZEN 2026-07-26 (measured delta 0.0027)}
+      abs_delta_mr: {max: 0.01, between: [ours.mr6, published.mr6],
+                     note: FROZEN 2026-07-26 (measured delta 0.0026)}
+
+  G_N1_1_repro:
+    description: >
+      Baseline repro: our retrained Forecast-MAE (clean data) within tolerance of
+      published val metrics. Tolerance frozen after G-N1-0 (provisional +0.05 minADE).
+      Multi-seed: 1 seed to pass provisionally, 3 seeds before any claimed delta.
+    frozen: false
+    depends_on: G_N1_0_evalkit
+    results:
+      ours: results/g_n1_1_retrain_eval.json
+    criteria:
+      minade6: {rel_max: {source: "results/fmae_published_val.json:minade6", offset: 0.05},
+                key: ours.minade6, note: PROVISIONAL offset — freeze after G-N1-0}
+      minfde6: {rel_max: {source: "results/fmae_published_val.json:minfde6", offset: 0.10},
+                key: ours.minfde6, note: PROVISIONAL}
+
+  G_N1_2_headline:
+    description: >
+      Headline degradation curve: 3 arms (C1 clean-trained / C2 clean+imputation /
+      C3 occlusion-aware) x severities S0-S4 x >=3 seeds, regime R-A, identical
+      deterministic masks. C3 vs C1 improvement at S2+ statistically significant on
+      per-scenario paired minFDE. Test + alpha PRE-REGISTERED in Phase 3 before any
+      masked training completes (placeholder below until then; check_gates skips
+      freeze_order: last criteria while unfrozen).
+      D-N1-10 addendum: P2 empirical mix is the primary eval condition; per-pattern
+      curves (M1/M2/M3-only at matched masked fractions) accompany the mixed curve,
+      and eval mask manifests carry per-scenario pattern labels for slicing.
+    frozen: false
+    depends_on: G_N1_1_repro
+    results:
+      headline: results/g_n1_2_headline.json
+    criteria:
+      n_seeds_per_arm: {min: 3, key: headline.n_seeds_per_arm}
+      paired_p_s2: {max: 0.05, key: headline.paired_p_s2, freeze_order: last,
+                    note: "PRE-REGISTERED 2026-07-27 (D-N1-12), BEFORE any masked training
+                           exists: one-sided Wilcoxon signed-rank on per-scenario paired
+                           minFDE6 deltas (C1 - C3; H1: C3 < C1), seed-mean per scenario
+                           (>=3 seeds/arm) before pairing, regime R-A, MIXED pattern
+                           condition, identical N1-mask-v2 masks. Tested at S2, S3, S4;
+                           alpha 0.05 with Holm-Bonferroni across the 3 severities.
+                           paired_p_s2 = Holm-adjusted p at S2. Effect size reported as
+                           seeded 10k-resample bootstrap 95% CI of the mean delta.
+                           Per-pattern cohort tests (D-N1-10): same procedure, REPORT-ONLY,
+                           never gate-blocking. Numeric freeze (frozen: true) still awaits
+                           results per protocol; the TEST SPEC is immutable from this
+                           commit."}
+      c3_beats_c1_s2: {equals: true, key: headline.c3_beats_c1_s2, freeze_order: last,
+                       note: "PRE-REGISTERED with D-N1-12 — direction check: seed-mean
+                              minFDE6(C3) < minFDE6(C1) at S2, S3, and S4 (all three)"}
+
+  G_N1_3_no_clean_tax:
+    description: >
+      No-clean-tax: C3 (occlusion-aware trained) at S0 within tolerance of C1 at S0.
+      Provisional tolerance +0.02 minADE — frozen with G-N1-2 pre-registration.
+    frozen: false
+    depends_on: G_N1_2_headline
+    results:
+      tax: results/g_n1_3_clean_tax.json
+    criteria:
+      s0_minade_gap: {max: 0.02, key: tax.s0_minade_gap,
+                      note: PROVISIONAL — C3_S0.minade6 - C1_S0.minade6 (seed-mean)}
+
+  G_N1_4_ship:
+    description: >
+      Ship package: public repo, runnable demo script, README with ghost-car GIF
+      (license-guard-classified visual), degradation-curve headline, honesty labels
+      (custom masked-eval protocol stated), quickstart.
+    frozen: false
+    depends_on: G_N1_2_headline
+    results:
+      ship: results/g_n1_4_ship.json
+    criteria:
+      demo_runs: {equals: true, key: ship.demo_runs}
+      readme_complete: {equals: true, key: ship.readme_complete}
+      license_guard_green: {equals: true, key: ship.license_guard_green}
+
+  G_N1_5_collapse_monitor:
+    description: >
+      Collapse monitor (D-N1-14d, owner directive after the D-N1-14c C3-local
+      collapse): history-sensitivity probe evaluated at EVERY training snapshot
+      of EVERY arm in the full matrix. Probe (scripts/history_sensitivity_probe.py,
+      formalizing the D-N1-14c diagnostic): on a fixed 50-scenario probe set
+      (first 50 of the val-subset ordering), replace the entire ACTORS feature
+      tensor with N(0, 5^2) noise and measure the max |delta| of the predicted
+      trajectories; probe value = median over the 50 scenarios; arm value =
+      min over snapshots with epoch >= 1. Reference points: healthy C1-local
+      65.7 m, collapsed C3-local 1e-5 m (results/local/c3_collapse_verification.json).
+      AN ARM FAILING THIS GATE IS DEAD ON ARRIVAL REGARDLESS OF ITS METRICS —
+      its results are reported as collapsed, never entered into G-N1-2/3.
+      Threshold PROVISIONAL until the PERUN pilot freezes it.
+    frozen: false
+    results:
+      probe: results/g_n1_5_collapse_monitor.json
+    criteria:
+      min_probe_disp_m: {min: 1.0, key: probe.min_probe_disp_m,
+                         note: "PROVISIONAL — freeze after PERUN pilot; separates
+                                measured healthy (65.7) from collapsed (1e-5)
+                                by >4 orders of magnitude either side"}
+
+  G_quality:
+    description: Code quality — enforced live by check_gates (pytest + ruff + coverage).
+    frozen: true
+    live: quality
+    criteria:
+      pytest: pass
+      ruff: clean
+      coverage_core: {min: 0.80, paths: [src/otraj]}

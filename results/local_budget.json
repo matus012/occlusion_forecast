@@ -1,0 +1,28 @@
+{
+  "decision": "D-N1-14a local budget freeze (2026-07-27, by measurement)",
+  "hardware": "RTX 4060 Laptop 8GB, i7-13650HX, 16GB RAM, torch 2.13.0+cu126, TF32 on",
+  "probe_measurements": {
+    "preprocess_scen_per_s_10workers": {"train": 27.341, "val": 22.682},
+    "feature_size_kb_per_scenario": 137,
+    "train_bs16": {"samples_per_s_incl_warmup": 3.09, "peak_vram_mb": 8661,
+                   "verdict": "VRAM spill past 8GB physical -> shared-memory thrash"},
+    "train_bs12": {"samples_per_s_incl_warmup": 13.12, "peak_vram_mb": 8500,
+                   "verdict": "VRAM spill on large-scene batches"},
+    "train_bs8": {"samples_per_s_incl_warmup": 12.33,
+                  "samples_per_s_steady": 21.0, "iters_per_s_steady": 2.7,
+                  "peak_vram_mb": 5041, "verdict": "chosen operating point"},
+    "probe_config": "1500-scenario prefix, 60-100 iters, single seed"
+  },
+  "frozen": {
+    "train_prefix": 20000,
+    "dev_slice": 1000,
+    "val_prefix": 2500,
+    "epochs": 20,
+    "batch_size": 8,
+    "seed": 42,
+    "lr_schedule": "SIMPL polyline scaled 50->20 epochs: milestones [0,2,14,16], values [1e-4,1e-3,1e-3,1e-4]",
+    "checkpoint_policy": "final epoch, both arms (no model selection; val subset untouched during training)",
+    "est_wall_per_arm_h": 5.5
+  },
+  "context": "SIMPL authors trained batch 16/GPU on 4x RTX 3090 24GB; bs16 does not fit 8GB (measured above) - this is the measured basis for the 8GB-infeasibility section of the PERUN request."
+}

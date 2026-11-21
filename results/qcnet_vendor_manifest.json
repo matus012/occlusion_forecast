@@ -1,0 +1,9 @@
+{
+  "repo": "https://github.com/ZikangZhou/QCNet",
+  "commit": "55cacb418cbbce3753119c1f157360e66993d0d0",
+  "commit_date": "2023-09-08T22:48:08+08:00",
+  "license": "Apache-2.0",
+  "vendored_at": "third_party/QCNet (untracked; regenerate with: git clone <repo> && git checkout <commit>)",
+  "env": "requirements-qcnet.txt (.venv-qcnet, py3.11, torch 2.7.0+cu126 — NOT the main env; PyG wheels from data.pyg.org/whl/torch-2.7.0+cu126.html)",
+  "purpose": "G-N1-0 eval-kit sanity anchor (D-N1-6): released checkpoint (results/qcnet_ckpt_manifest.json) scored through the official av2 eval kit"
+}
